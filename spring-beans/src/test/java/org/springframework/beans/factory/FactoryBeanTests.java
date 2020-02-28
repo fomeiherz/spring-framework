@@ -16,22 +16,23 @@
 
 package org.springframework.beans.factory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.Test;
-
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.Assert.*;
-import static org.springframework.tests.TestResourceUtils.*;
+import static org.springframework.tests.TestResourceUtils.qualifiedResource;
 
 /**
  * @author Rob Harrop
@@ -329,6 +330,72 @@ public class FactoryBeanTests {
 
 		public void setImpl1(BeanImpl1 impl1) {
 			this.impl1 = impl1;
+		}
+	}
+
+	@Test
+	public void testFactoryBean() throws Exception {
+		BeanFactory factory = new XmlBeanFactory(new ClassPathResource("FactoryBeanTests.xml", getClass()));
+		// Return Car instance.
+		Car car = factory.getBean("car", Car.class);
+		System.out.println(car.brand);
+		// Return CarFactoryBean instance.
+		CarFactoryBean bean = factory.getBean("&car", CarFactoryBean.class);
+		Assert.isInstanceOf(CarFactoryBean.class, bean, "The bean of factory returned is error.");
+		Car car1 = bean.getObject();
+		assert car1 != null;
+		Assert.isTrue(car1.brand.equals("奔驰"), "Car's brand is invalid.");
+	}
+
+	public static class CarFactoryBean implements FactoryBean<Car> {
+
+		@Override
+		public Car getObject() throws Exception {
+			Car car = new Car();
+			car.setBrand("奔驰");
+			car.setMaxSpeed(180);
+			car.setPrice(45.6);
+			return car;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return Car.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return false;
+		}
+	}
+
+	public static class Car {
+		private int maxSpeed;
+		private String brand;
+		private double price;
+
+		public int getMaxSpeed() {
+			return maxSpeed;
+		}
+
+		public void setMaxSpeed(int maxSpeed) {
+			this.maxSpeed = maxSpeed;
+		}
+
+		public String getBrand() {
+			return brand;
+		}
+
+		public void setBrand(String brand) {
+			this.brand = brand;
+		}
+
+		public double getPrice() {
+			return price;
+		}
+
+		public void setPrice(double price) {
+			this.price = price;
 		}
 	}
 

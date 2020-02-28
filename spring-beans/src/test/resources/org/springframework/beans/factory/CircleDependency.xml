@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean id="classA" class="org.springframework.beans.factory.CircleDependencyTests.ClassA">
+		<constructor-arg index="0" ref="classB"/>
+	</bean>
+	<bean id="classB" class="org.springframework.beans.factory.CircleDependencyTests.ClassB">
+		<constructor-arg index="0" ref="classC"/>
+	</bean>
+	<bean id="classC" class="org.springframework.beans.factory.CircleDependencyTests.ClassC">
+		<constructor-arg index="0" ref="classA"/>
+	</bean>
+
+	<bean id="classD" class="org.springframework.beans.factory.CircleDependencyTests.ClassD" />
+	<bean id="classE" class="org.springframework.beans.factory.CircleDependencyTests.ClassE" />
+	<bean id="classF" class="org.springframework.beans.factory.CircleDependencyTests.ClassF" />
+
+</beans>

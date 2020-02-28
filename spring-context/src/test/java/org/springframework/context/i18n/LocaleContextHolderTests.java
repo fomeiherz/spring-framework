@@ -16,10 +16,14 @@
 
 package org.springframework.context.i18n;
 
+import java.text.MessageFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
 import org.junit.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContextOverride;
 
 import static org.junit.Assert.*;
 
@@ -160,6 +164,33 @@ public class LocaleContextHolderTests {
 		assertEquals(Locale.getDefault(), LocaleContextHolder.getLocale());
 		assertEquals(TimeZone.getDefault(), LocaleContextHolder.getTimeZone());
 		assertNull(LocaleContextHolder.getLocaleContext());
+	}
+
+	@Test
+	public void testPlaceholderReplace() {
+		String pattern1 = "{0}，您好，您在{1}存入{2}";
+		String pattern2 = "{0},hello, you put to {1} money: {2}.";
+		Object[] params = {"Join", System.currentTimeMillis(), 110.56};
+		String msg1 = MessageFormat.format(pattern1, params);
+		System.out.println(msg1);
+
+		MessageFormat mf = new MessageFormat(pattern2, Locale.US);
+		String msg2 = mf.format(params);
+		System.out.println(msg2);
+	}
+
+	@Test
+	public void testMessageSource() {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("i18nApplicationContext.xml", getClass());
+
+		Object[] params = {"Join"};
+		// 在中国，默认取的是Locale.CHINA
+		String msg0 = ctx.getMessage("test", params, Locale.getDefault());
+		System.out.println(msg0);
+		String msg2 = ctx.getMessage("test", params, Locale.US);
+		System.out.println(msg2);
+		String msg1 = ctx.getMessage("test", null, Locale.CHINA);
+		System.out.println(msg1);
 	}
 
 }

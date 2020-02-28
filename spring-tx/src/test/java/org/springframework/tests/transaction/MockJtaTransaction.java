@@ -16,6 +16,8 @@
 
 package org.springframework.tests.transaction;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 import javax.transaction.xa.XAResource;
@@ -62,6 +64,11 @@ public class MockJtaTransaction implements javax.transaction.Transaction {
 
 	@Override
 	public void setRollbackOnly() {
+	}
+
+	@Transactional(readOnly = true)
+	public void testReadOnly() {
+
 	}
 
 }

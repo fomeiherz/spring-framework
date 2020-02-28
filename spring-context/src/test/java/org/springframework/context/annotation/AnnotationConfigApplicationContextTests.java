@@ -30,6 +30,8 @@ import org.springframework.context.annotation6.ComponentForScanning;
 import org.springframework.context.annotation6.ConfigForScanning;
 import org.springframework.context.annotation6.Jsr330NamedForScanning;
 
+import javax.annotation.PostConstruct;
+
 import static java.lang.String.format;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -431,6 +433,15 @@ public class AnnotationConfigApplicationContextTests {
 }
 
 class TestBean {
+	
+	@PostConstruct
+	public void init() {
+		System.out.println("@PostConstruct testBean...");
+	}
+	
+	public TestBean() {
+		System.out.println("instancing testBean...");
+	}
 
 	String name;
 

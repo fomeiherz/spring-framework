@@ -291,6 +291,7 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 
 	@Override
 	public boolean matches(Method method, @Nullable Class<?> targetClass, boolean hasIntroductions) {
+		// 获取切面表达式：execution(* *(..))
 		obtainPointcutExpression();
 		ShadowMatch shadowMatch = getTargetShadowMatch(method, targetClass);
 
