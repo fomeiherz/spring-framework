@@ -262,6 +262,7 @@ class ConstructorResolver {
 		}
 
 		try {
+			// 使用策略模式创建实例
 			final InstantiationStrategy strategy = beanFactory.getInstantiationStrategy();
 			Object beanInstance;
 

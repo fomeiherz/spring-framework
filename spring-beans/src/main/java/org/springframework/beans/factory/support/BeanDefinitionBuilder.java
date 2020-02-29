@@ -34,6 +34,14 @@ import org.springframework.util.ObjectUtils;
  * @author Juergen Hoeller
  * @since 2.0
  */
+/*
+// 构造器模式的作用：用于构造一个复杂的对象。
+
+// 使用构造器模式来构造BeanDefinition对象
+//   - 持有要构造的类对象BeanDefinition
+//   - 使用静态方法获取BeanDefinitionBuilder实例
+//   - 使用链式给属性赋值
+*/
 public class BeanDefinitionBuilder {
 
 	/**
