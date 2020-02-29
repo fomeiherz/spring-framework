@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package org.springframework.http.codec;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.ResourceDecoder;
 import org.springframework.core.codec.ResourceEncoder;
 import org.springframework.core.codec.ResourceRegionEncoder;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferFactory;
@@ -47,14 +49,11 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.Nullable;
 import org.springframework.util.MimeTypeUtils;
 
-import static java.util.Collections.*;
-
 /**
  * {@code HttpMessageWriter} that can write a {@link Resource}.
  *
- * <p>Also an implementation of {@code HttpMessageWriter} with support
- * for writing one or more {@link ResourceRegion}'s based on the HTTP ranges
- * specified in the request.
+ * <p>Also an implementation of {@code HttpMessageWriter} with support for writing one
+ * or more {@link ResourceRegion}'s based on the HTTP ranges specified in the request.
  *
  * <p>For reading to a Resource, use {@link ResourceDecoder} wrapped with
  * {@link DecoderHttpMessageReader}.
@@ -119,9 +118,9 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		headers.setContentType(resourceMediaType);
 
 		if (headers.getContentLength() < 0) {
-			Long contentLength = this.encoder.getContentLength(resource, mediaType);
-			if (contentLength != null) {
-				headers.setContentLength(contentLength);
+			long length = lengthOf(resource);
+			if (length != -1) {
+				headers.setContentLength(length);
 			}
 		}
 
@@ -139,6 +138,18 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			return mediaType;
 		}
 		return MediaTypeFactory.getMediaType(resource).orElse(MediaType.APPLICATION_OCTET_STREAM);
+	}
+
+	private static long lengthOf(Resource resource) {
+		// Don't consume InputStream...
+		if (InputStreamResource.class != resource.getClass()) {
+			try {
+				return resource.contentLength();
+			}
+			catch (IOException ignored) {
+			}
+		}
+		return -1;
 	}
 
 	private static Optional<Mono<Void>> zeroCopy(Resource resource, @Nullable ResourceRegion region,
@@ -162,7 +173,6 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 	// Server-side only: single Resource or sub-regions...
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Mono<Void> write(Publisher<? extends Resource> inputStream, @Nullable ResolvableType actualType,
 			ResolvableType elementType, @Nullable MediaType mediaType, ServerHttpRequest request,
 			ServerHttpResponse response, Map<String, Object> hints) {
@@ -180,11 +190,9 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 		}
 
 		return Mono.from(inputStream).flatMap(resource -> {
-
 			if (ranges.isEmpty()) {
 				return writeResource(resource, elementType, mediaType, response, hints);
 			}
-
 			response.setStatusCode(HttpStatus.PARTIAL_CONTENT);
 			List<ResourceRegion> regions = HttpRange.toResourceRegions(ranges, resource);
 			MediaType resourceMediaType = getResourceMediaType(mediaType, resource);
@@ -192,8 +200,8 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 			if (regions.size() == 1){
 				ResourceRegion region = regions.get(0);
 				headers.setContentType(resourceMediaType);
-				Long contentLength = this.encoder.getContentLength(resource, mediaType);
-				if (contentLength != null) {
+				long contentLength = lengthOf(resource);
+				if (contentLength != -1) {
 					long start = region.getPosition();
 					long end = start + region.getCount() - 1;
 					end = Math.min(end, contentLength - 1);
@@ -219,7 +227,7 @@ public class ResourceHttpMessageWriter implements HttpMessageWriter<Resource> {
 				.orElseGet(() -> {
 					Publisher<? extends ResourceRegion> input = Mono.just(region);
 					MediaType mediaType = message.getHeaders().getContentType();
-					return encodeAndWriteRegions(input, mediaType, message, emptyMap());
+					return encodeAndWriteRegions(input, mediaType, message, Collections.emptyMap());
 				});
 	}
 

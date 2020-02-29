@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import static org.junit.Assert.*;
 import static org.springframework.http.MediaType.*;
-import static org.springframework.web.reactive.function.BodyExtractors.*;
 import static org.springframework.web.reactive.function.BodyInserters.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.*;
 
@@ -43,18 +42,18 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 	private WebClient webClient;
 
 
+	@Before
+	public void setup() throws Exception {
+		super.setup();
+		this.webClient = WebClient.create("http://localhost:" + this.port);
+	}
+
 	@Override
 	protected RouterFunction<?> routerFunction() {
 		SseHandler sseHandler = new SseHandler();
 		return route(RequestPredicates.GET("/string"), sseHandler::string)
 				.and(route(RequestPredicates.GET("/person"), sseHandler::person))
 				.and(route(RequestPredicates.GET("/event"), sseHandler::sse));
-	}
-
-	@Before
-	public void setup() throws Exception {
-		super.setup();
-		this.webClient = WebClient.create("http://localhost:" + this.port);
 	}
 
 
@@ -118,8 +117,7 @@ public class SseHandlerFunctionIntegrationTests extends AbstractRouterFunctionIn
 
 	private static class SseHandler {
 
-		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 2);
-
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 2);
 
 		Mono<ServerResponse> string(ServerRequest request) {
 			return ServerResponse.ok()

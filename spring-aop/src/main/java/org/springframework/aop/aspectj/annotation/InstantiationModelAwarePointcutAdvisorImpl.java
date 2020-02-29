@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -121,29 +121,22 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 
 	/**
-	 * The pointcut for Spring AOP to use. Actual behaviour of the pointcut will change
-	 * depending on the state of the advice.
+	 * The pointcut for Spring AOP to use.
+	 * Actual behaviour of the pointcut will change depending on the state of the advice.
 	 */
 	@Override
 	public Pointcut getPointcut() {
 		return this.pointcut;
 	}
 
-	/**
-	 * This is only of interest for Spring AOP: AspectJ instantiation semantics
-	 * are much richer. In AspectJ terminology, all a return of {@code true}
-	 * means here is that the aspect is not a SINGLETON.
-	 */
 	@Override
-	public boolean isPerInstance() {
-		return (getAspectMetadata().getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON);
+	public boolean isLazy() {
+		return this.lazy;
 	}
 
-	/**
-	 * Return the AspectJ AspectMetadata for this advisor.
-	 */
-	public AspectMetadata getAspectMetadata() {
-		return this.aspectInstanceFactory.getAspectMetadata();
+	@Override
+	public synchronized boolean isAdviceInstantiated() {
+		return (this.instantiatedAdvice != null);
 	}
 
 	/**
@@ -157,16 +150,23 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		return this.instantiatedAdvice;
 	}
 
-	@Override
-	public boolean isLazy() {
-		return this.lazy;
+	private Advice instantiateAdvice(AspectJExpressionPointcut pointcut) {
+		Advice advice = this.aspectJAdvisorFactory.getAdvice(this.aspectJAdviceMethod, pointcut,
+				this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
+		return (advice != null ? advice : EMPTY_ADVICE);
 	}
 
+	/**
+	 * This is only of interest for Spring AOP: AspectJ instantiation semantics
+	 * are much richer. In AspectJ terminology, all a return of {@code true}
+	 * means here is that the aspect is not a SINGLETON.
+	 */
 	@Override
-	public synchronized boolean isAdviceInstantiated() {
-		return (this.instantiatedAdvice != null);
+	public boolean isPerInstance() {
+		return (getAspectMetadata().getAjType().getPerClause().getKind() != PerClauseKind.SINGLETON);
 	}
 
+<<<<<<< HEAD
 
 	private Advice instantiateAdvice(AspectJExpressionPointcut pointcut) {
 		// Spring的get方法往往包含了初始化操作
@@ -174,6 +174,13 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		Advice advice = this.aspectJAdvisorFactory.getAdvice(this.aspectJAdviceMethod, pointcut,
 				this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
 		return (advice != null ? advice : EMPTY_ADVICE);
+=======
+	/**
+	 * Return the AspectJ AspectMetadata for this advisor.
+	 */
+	public AspectMetadata getAspectMetadata() {
+		return this.aspectInstanceFactory.getAspectMetadata();
+>>>>>>> 5eb84306887d4474a0ad14bbe2de840459337963
 	}
 
 	public MetadataAwareAspectInstanceFactory getAspectInstanceFactory() {
@@ -228,32 +235,25 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			switch (aspectJAnnotation.getAnnotationType()) {
+				case AtPointcut:
+				case AtAround:
+					this.isBeforeAdvice = false;
+					this.isAfterAdvice = false;
+					break;
+				case AtBefore:
+					this.isBeforeAdvice = true;
+					this.isAfterAdvice = false;
+					break;
 				case AtAfter:
 				case AtAfterReturning:
 				case AtAfterThrowing:
+					this.isBeforeAdvice = false;
 					this.isAfterAdvice = true;
-					this.isBeforeAdvice = false;
 					break;
-				case AtAround:
-				case AtPointcut:
-					this.isAfterAdvice = false;
-					this.isBeforeAdvice = false;
-					break;
-				case AtBefore:
-					this.isAfterAdvice = false;
-					this.isBeforeAdvice = true;
 			}
 		}
 	}
 
-
-	@Override
-	public String toString() {
-		return "InstantiationModelAwarePointcutAdvisor: expression [" + getDeclaredPointcut().getExpression() +
-			"]; advice method [" + this.aspectJAdviceMethod + "]; perClauseKind=" +
-			this.aspectInstanceFactory.getAspectMetadata().getAjType().getPerClause().getKind();
-
-	}
 
 	private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 		inputStream.defaultReadObject();
@@ -265,11 +265,18 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 	}
 
+	@Override
+	public String toString() {
+		return "InstantiationModelAwarePointcutAdvisor: expression [" + getDeclaredPointcut().getExpression() +
+				"]; advice method [" + this.aspectJAdviceMethod + "]; perClauseKind=" +
+				this.aspectInstanceFactory.getAspectMetadata().getAjType().getPerClause().getKind();
+	}
+
 
 	/**
 	 * Pointcut implementation that changes its behaviour when the advice is instantiated.
-	 * Note that this is a <i>dynamic</i> pointcut. Otherwise it might
-	 * be optimized out if it does not at first match statically.
+	 * Note that this is a <i>dynamic</i> pointcut; otherwise it might be optimized out
+	 * if it does not at first match statically.
 	 */
 	private class PerTargetInstantiationModelPointcut extends DynamicMethodMatcherPointcut {
 
@@ -280,7 +287,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		@Nullable
 		private LazySingletonAspectInstanceFactoryDecorator aspectInstanceFactory;
 
-		private PerTargetInstantiationModelPointcut(AspectJExpressionPointcut declaredPointcut,
+		public PerTargetInstantiationModelPointcut(AspectJExpressionPointcut declaredPointcut,
 				Pointcut preInstantiationPointcut, MetadataAwareAspectInstanceFactory aspectInstanceFactory) {
 
 			this.declaredPointcut = declaredPointcut;
@@ -292,7 +299,8 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 		@Override
 		public boolean matches(Method method, @Nullable Class<?> targetClass) {
-			// We're either instantiated and matching on declared pointcut, or uninstantiated matching on either pointcut
+			// We're either instantiated and matching on declared pointcut,
+			// or uninstantiated matching on either pointcut...
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass)) ||
 					this.preInstantiationPointcut.getMethodMatcher().matches(method, targetClass);
 		}

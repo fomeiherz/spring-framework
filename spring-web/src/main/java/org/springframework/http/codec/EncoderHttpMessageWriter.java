@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,6 +46,7 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 5.0
  */
 public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
@@ -98,22 +99,19 @@ public class EncoderHttpMessageWriter<T> implements HttpMessageWriter<T> {
 			@Nullable MediaType mediaType, ReactiveHttpOutputMessage message, Map<String, Object> hints) {
 
 		MediaType contentType = updateContentType(message, mediaType);
-		HttpHeaders headers = message.getHeaders();
-
-		if (headers.getContentLength() < 0 && !headers.containsKey(HttpHeaders.TRANSFER_ENCODING)) {
-			if (inputStream instanceof Mono) {
-				// This works because we don't actually commit until after the first signal...
-				inputStream = ((Mono<T>) inputStream).doOnNext(data -> {
-					Long contentLength = this.encoder.getContentLength(data, contentType);
-					if (contentLength != null) {
-						headers.setContentLength(contentLength);
-					}
-				});
-			}
-		}
 
 		Flux<DataBuffer> body = this.encoder.encode(
 				inputStream, message.bufferFactory(), elementType, contentType, hints);
+
+		if (inputStream instanceof Mono) {
+			HttpHeaders headers = message.getHeaders();
+			return Mono.from(body)
+					.defaultIfEmpty(message.bufferFactory().wrap(new byte[0]))
+					.flatMap(buffer -> {
+						headers.setContentLength(buffer.readableByteCount());
+						return message.writeWith(Mono.just(buffer));
+					});
+		}
 
 		return (isStreamingMediaType(contentType) ?
 				message.writeAndFlushWith(body.map(Flux::just)) : message.writeWith(body));

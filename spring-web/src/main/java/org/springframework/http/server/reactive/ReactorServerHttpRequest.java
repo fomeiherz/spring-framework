@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -167,7 +167,12 @@ class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return this.request.receive().retain().map(this.bufferFactory::wrap);
+		// 5.0.x only: do not retain, make a copy..
+		return this.request.receive().map(byteBuf -> {
+			byte[] data = new byte[byteBuf.readableBytes()];
+			byteBuf.readBytes(data);
+			return bufferFactory.wrap(data);
+		});
 	}
 
 	@SuppressWarnings("unchecked")

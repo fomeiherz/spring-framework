@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,7 +34,7 @@ public class HeadersRequestConditionTests {
 	public void headerEquals() {
 		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("foo"));
 		assertEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("FOO"));
-		assertFalse(new HeadersRequestCondition("foo").equals(new HeadersRequestCondition("bar")));
+		assertNotEquals(new HeadersRequestCondition("foo"), new HeadersRequestCondition("bar"));
 		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("foo=bar"));
 		assertEquals(new HeadersRequestCondition("foo=bar"), new HeadersRequestCondition("FOO=bar"));
 	}

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,6 +99,16 @@ public class ResourceTransformerSupportTests {
 				"../bar.css", exchange, imagePng, this.transformerChain).block(Duration.ofSeconds(5));
 
 		assertEquals("../bar-11e16cf79faee7ac698c805cf28248d2.css", actual);
+	}
+
+	@Test
+	public void toAbsolutePath() {
+		MockServerWebExchange exchange = MockServerWebExchange.from(MockServerHttpRequest.get("/resources/main.css"));
+		String absolute = this.transformer.toAbsolutePath("img/image.png", exchange);
+		assertEquals("/resources/img/image.png", absolute);
+
+		absolute = this.transformer.toAbsolutePath("/img/image.png", exchange);
+		assertEquals("/img/image.png", absolute);
 	}
 
 

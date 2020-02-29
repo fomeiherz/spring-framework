@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -367,10 +367,10 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(() -> {
 				List<String> removedIds = new ArrayList<>();
-				for (SockJsSession session : sessions.values()) {
+				for (SockJsSession session : this.sessions.values()) {
 					try {
 						if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
-							sessions.remove(session.getId());
+							this.sessions.remove(session.getId());
 							removedIds.add(session.getId());
 							session.close();
 						}

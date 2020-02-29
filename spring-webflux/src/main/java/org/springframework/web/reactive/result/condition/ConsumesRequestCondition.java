@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -145,7 +145,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 	 */
 	@Override
 	public ConsumesRequestCondition combine(ConsumesRequestCondition other) {
-		return !other.expressions.isEmpty() ? other : this;
+		return (!other.expressions.isEmpty() ? other : this);
 	}
 
 	/**
@@ -168,7 +168,7 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		}
 		Set<ConsumeMediaTypeExpression> result = new LinkedHashSet<>(expressions);
 		result.removeIf(expression -> !expression.match(exchange));
-		return (result.isEmpty()) ? null : new ConsumesRequestCondition(result);
+		return (!result.isEmpty() ? new ConsumesRequestCondition(result) : null);
 	}
 
 	/**

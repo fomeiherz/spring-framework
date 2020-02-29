@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,6 @@ package org.springframework.context.annotation.configuration;
 
 import org.junit.Test;
 
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
@@ -67,7 +66,7 @@ public class DuplicatePostProcessingTests {
 		private final ExampleBean exampleBean = new ExampleBean();
 
 		@Override
-		public ExampleBean getObject() throws Exception {
+		public ExampleBean getObject() {
 			return this.exampleBean;
 		}
 
@@ -87,14 +86,13 @@ public class DuplicatePostProcessingTests {
 
 		private ApplicationContext applicationContext;
 
-
 		@Override
-		public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessBeforeInitialization(Object bean, String beanName) {
 			return bean;
 		}
 
 		@Override
-		public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+		public Object postProcessAfterInitialization(Object bean, String beanName) {
 			if (bean instanceof ExampleBean) {
 				this.applicationContext.publishEvent(new ExampleApplicationEvent(this));
 			}
@@ -102,12 +100,13 @@ public class DuplicatePostProcessingTests {
 		}
 
 		@Override
-		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		public void setApplicationContext(ApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
 		}
 	}
 
 
+	@SuppressWarnings("serial")
 	static class ExampleApplicationEvent extends ApplicationEvent {
 
 		public ExampleApplicationEvent(Object source) {
@@ -126,7 +125,7 @@ public class DuplicatePostProcessingTests {
 		}
 
 		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		public void setBeanFactory(BeanFactory beanFactory) {
 			this.beanFactory = beanFactory;
 		}
 	}

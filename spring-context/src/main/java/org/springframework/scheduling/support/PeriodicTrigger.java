@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -144,16 +144,16 @@ public class PeriodicTrigger implements Trigger {
 
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (!(obj instanceof PeriodicTrigger)) {
+		if (!(other instanceof PeriodicTrigger)) {
 			return false;
 		}
-		PeriodicTrigger other = (PeriodicTrigger) obj;
-		return (this.fixedRate == other.fixedRate && this.initialDelay == other.initialDelay &&
-				this.period == other.period);
+		PeriodicTrigger otherTrigger = (PeriodicTrigger) other;
+		return (this.fixedRate == otherTrigger.fixedRate && this.initialDelay == otherTrigger.initialDelay &&
+				this.period == otherTrigger.period);
 	}
 
 	@Override

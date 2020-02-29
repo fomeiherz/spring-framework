@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,7 +93,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * List of Advisors. If an Advice is added, it will be wrapped
 	 * in an Advisor before being added to this List.
 	 */
-	private List<Advisor> advisors = new LinkedList<>();
+	private List<Advisor> advisors = new ArrayList<>();
 
 	/**
 	 * Array updated on changes to the advisors list, which is easier
@@ -153,11 +152,12 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * @see #setTargetSource
 	 * @see #setTarget
 	 */
-	public void setTargetClass(Class<?> targetClass) {
+	public void setTargetClass(@Nullable Class<?> targetClass) {
 		this.targetSource = EmptyTargetSource.forClass(targetClass);
 	}
 
 	@Override
+	@Nullable
 	public Class<?> getTargetClass() {
 		return this.targetSource.getTargetClass();
 	}
@@ -474,7 +474,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * for the given method, based on this configuration.
 	 * @param method the proxied method
 	 * @param targetClass the target class
-	 * @return List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
+	 * @return a List of MethodInterceptors (may also include InterceptorAndDynamicMethodMatchers)
 	 */
 	public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Method method, @Nullable Class<?> targetClass) {
 		MethodCacheKey cacheKey = new MethodCacheKey(method);
@@ -528,7 +528,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 	/**
 	 * Build a configuration-only copy of this AdvisedSupport,
-	 * replacing the TargetSource
+	 * replacing the TargetSource.
 	 */
 	AdvisedSupport getConfigurationOnlyCopy() {
 		AdvisedSupport copy = new AdvisedSupport();

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -113,7 +112,7 @@ public class FreeMarkerConfigurationFactory {
 	 * @see #setTemplateLoaderPath
 	 */
 	public void setConfigLocation(Resource resource) {
-		configLocation = resource;
+		this.configLocation = resource;
 	}
 
 	/**
@@ -285,7 +284,7 @@ public class FreeMarkerConfigurationFactory {
 			config.setDefaultEncoding(this.defaultEncoding);
 		}
 
-		List<TemplateLoader> templateLoaders = new LinkedList<>(this.templateLoaders);
+		List<TemplateLoader> templateLoaders = new ArrayList<>(this.templateLoaders);
 
 		// Register template loaders that are supposed to kick in early.
 		if (this.preTemplateLoaders != null) {

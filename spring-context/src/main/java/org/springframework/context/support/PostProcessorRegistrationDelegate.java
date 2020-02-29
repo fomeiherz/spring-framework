@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,10 +18,8 @@ package org.springframework.context.support;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -48,7 +46,7 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 4.0
  */
-class PostProcessorRegistrationDelegate {
+final class PostProcessorRegistrationDelegate {
 
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
@@ -58,8 +56,8 @@ class PostProcessorRegistrationDelegate {
 
 		if (beanFactory instanceof BeanDefinitionRegistry) {
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
-			List<BeanFactoryPostProcessor> regularPostProcessors = new LinkedList<>();
-			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new LinkedList<>();
+			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
+			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
 
 			// 硬编码注册的后处理器
 			// 筛选出BeanDefinitionRegistryPostProcessor对象，放进registryProcessors对象
@@ -304,7 +302,7 @@ class PostProcessorRegistrationDelegate {
 	 * BeanPostProcessor instantiation, i.e. when a bean is not eligible for
 	 * getting processed by all BeanPostProcessors.
 	 */
-	private static class BeanPostProcessorChecker implements BeanPostProcessor {
+	private static final class BeanPostProcessorChecker implements BeanPostProcessor {
 
 		private static final Log logger = LogFactory.getLog(BeanPostProcessorChecker.class);
 

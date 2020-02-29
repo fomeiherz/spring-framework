@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -192,7 +192,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * Future implementations might add some default behavior, however.
 	 */
 	@Override
-	public final T read(Class<? extends T> clazz, HttpInputMessage inputMessage) throws IOException {
+	public final T read(Class<? extends T> clazz, HttpInputMessage inputMessage)
+			throws IOException, HttpMessageNotReadableException {
+
 		return readInternal(clazz, inputMessage);
 	}
 
@@ -233,7 +235,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * {@link #getContentLength}, and sets the corresponding headers.
 	 * @since 4.2
 	 */
-	protected void addDefaultHeaders(HttpHeaders headers, T t, @Nullable MediaType contentType) throws IOException{
+	protected void addDefaultHeaders(HttpHeaders headers, T t, @Nullable MediaType contentType) throws IOException {
 		if (headers.getContentType() == null) {
 			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {

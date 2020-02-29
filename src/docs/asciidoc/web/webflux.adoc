@@ -10,7 +10,7 @@
 The original web framework included in the Spring Framework, Spring Web MVC, was purpose
 built for the Servlet API and Servlet containers. The reactive stack, web framework,
 Spring WebFlux, was added later in version 5.0. It is fully non-blocking, supports
-http://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on servers such as
+https://www.reactive-streams.org/[Reactive Streams] back pressure, and runs on servers such as
 Netty, Undertow, and Servlet 3.1+ containers.
 
 Both web frameworks mirror the names of their source modules
@@ -66,9 +66,9 @@ https://github.com/reactive-streams/reactive-streams-jvm/blob/v1.0.1/README.md#s
 also https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.html[adopted] in Java 9,
 that defines the interaction between asynchronous components with back pressure.
 For example a data repository -- acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher],
+https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Publisher.html[Publisher],
 can produce data that an HTTP server -- acting as
-http://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber],
+https://www.reactive-streams.org/reactive-streams-1.0.1-javadoc/org/reactivestreams/Subscriber.html[Subscriber],
 can then write to the response. The main purpose of Reactive Streams is to allow the
 subscriber to control how fast or how slow the publisher will produce data.
 
@@ -306,32 +306,31 @@ libraries, refer to their respective documentation.
 
 
 [[webflux-reactive-spring-web]]
-== Reactive Spring Web
+== Reactive Core
 
-The `spring-web` module provides low level infrastructure and HTTP abstractions -- client
-and server, to build reactive web applications. All public APIs are built around Reactive
-Streams with Reactor as a backing implementation.
+The `spring-web` module contains abstractions and infrastructure to build reactive web
+applications. For server side processing this is organized in two distinct levels:
 
-Server support is organized in two layers:
+* <<webflux-httphandler,HttpHandler>> -- basic, common API for HTTP request handling with
+non-blocking I/O and (Reactive Streams) back pressure, along with adapters for each
+supported server.
+* <<webflux-web-handler-api>> -- slightly higher level, but still general purpose API for
+server request handling, which underlies higher level programming models such as annotated
+controllers and functional endpoints.
 
-* <<webflux-httphandler,HttpHandler>> and server adapters -- the most basic, common API
-for HTTP request handling with Reactive Streams back pressure.
-* <<webflux-web-handler-api>> -- slightly higher level but still general
-purpose server web API with filter chain style processing.
+The reactive core also includes <<webflux-codecs>> for client and server side use.
 
 
 
 [[webflux-httphandler]]
 === HttpHandler
 
-Every HTTP server has some API for HTTP request handling.
 {api-spring-framework}/http/server/reactive/HttpHandler.html[HttpHandler]
-is a simple contract with one method to handle a request and response.
-It is intentionally minimal. Its main purpose is to provide a common, Reactive Streams
-based API for HTTP request handling over different servers.
+is a simple contract with a single method to handle a request and response. It is
+intentionally minimal as its main purpose is to provide an abstraction over different
+server APIs for HTTP request handling.
 
-The `spring-web` module contains adapters for every supported server. The table below shows
-the server APIs are used and where Reactive Streams support comes from:
+Supported server APIs:
 
 [cols="1,2,2", options="header"]
 |===
@@ -358,9 +357,8 @@ the server APIs are used and where Reactive Streams support comes from:
 | spring-web: Servlet 3.1 non-blocking I/O to Reactive Streams bridge
 |===
 
-Here are required dependencies,
-https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions],
-and code snippets for each server:
+Server dependencies (and
+https://github.com/spring-projects/spring-framework/wiki/What%27s-New-in-the-Spring-Framework[supported versions]):
 
 |===
 |Server name|Group id|Artifact name
@@ -382,7 +380,9 @@ and code snippets for each server:
 |jetty-server, jetty-servlet
 |===
 
-Reactor Netty:
+Code snippets to adapt `HttpHandler` to each server API:
+
+*Reactor Netty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -391,7 +391,7 @@ ReactorHttpHandlerAdapter adapter = new ReactorHttpHandlerAdapter(handler);
 HttpServer.create(host, port).newHandler(adapter).block();
 ----
 
-Undertow:
+*Undertow*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -401,7 +401,7 @@ Undertow server = Undertow.builder().addHttpListener(port, host).setHandler(adap
 server.start();
 ----
 
-Tomcat:
+*Tomcat*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -418,7 +418,7 @@ server.setPort(port);
 server.start();
 ----
 
-Jetty:
+*Jetty*
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -437,13 +437,12 @@ server.addConnector(connector);
 server.start();
 ----
 
-[NOTE]
-====
-To deploy as a WAR to a Servlet 3.1+ container, wrap `HttpHandler` with
-`ServletHttpHandlerAdapter` and register that as a `Servlet`.
-This can be automated through the use of
-{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer].
-====
+*Servlet 3.1+ Container*
+
+To deploy as a WAR to any Servlet 3.1+ container, simply extend and include
+{api-spring-framework}/web/server/adapter/AbstractReactiveWebInitializer.html[AbstractReactiveWebInitializer]
+in the WAR, which wraps an `HttpHandler` with `ServletHttpHandlerAdapter` and registers
+that as a `Servlet`.
 
 
 
@@ -451,9 +450,9 @@ This can be automated through the use of
 === WebHandler API
 
 The WebHandler API is a general purpose, server, web API for processing requests through a
-chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler's],
-{api-spring-framework}/web/server/WebFilter.html[WebFilter's], and a target
-{api-spring-framework}/web/server/WebHandler.html[WebHandler]. The chain can be assembled
+chain of {api-spring-framework}/web/server/WebExceptionHandler.html[WebExceptionHandler],
+{api-spring-framework}/web/server/WebFilter.html[WebFilter], and a target
+{api-spring-framework}/web/server/WebHandler.html[WebHandler] components. The chain can be assembled
 with `WebHttpHandlerBuilder` either by adding components to the builder or by having them
 detected from a Spring `ApplicationContext`. The builder returns an
 <<webflux-httphandler>> that can then be used to run on any of the supported servers.
@@ -555,84 +554,6 @@ content to `Flux<Part>` without collecting to a `MultiValueMap`.
 
 
 
-[[webflux-codecs]]
-=== Message Codecs
-[.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
-
-The `spring-web` module defines the
-{api-spring-framework}/http/codec/HttpMessageReader.html[HttpMessageReader] and
-{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] contracts
-for encoding and decoding the body of HTTP requests and responses via Rective Streams
-``Publisher``'s. These contacts are used on the client side, e.g. in the `WebClient`,
-and on the server side, e.g. in annotated controllers and functional endpoints.
-
-The `spring-core` module defines the
-{api-spring-framework}/core/codec/Encoder.html[Encoder] and
-{api-spring-framework}/core/codec/Decoder.html[Decoder] contracts that are independent of
-HTTP and rely on the {api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer]
-contract that abstracts different byte buffer representations such as the Netty `ByteBuf`
-and `java.nio.ByteBuffer` (see <<core#databuffers, Data Buffers and Codecs>>).
-An `Encoder` can be wrapped with `EncoderHttpMessageWriter` to be used as an
-`HttpMessageWriter` while a `Decoder` can be wrapped with `DecoderHttpMessageReader` to
-be used as an `HttpMessageReader`.
-
-The `spring-core` module contains basic `Encoder` and `Decoder` implementations for
-`byte[]`, `ByteBuffer`, `DataBuffer`, `Resource`, and `String`. The `spring-web` module
-adds ``Encoder``'s and ``Decoder``'s for Jackson JSON, Jackson Smile, and JAXB2.
-The `spring-web` module also contains some web-specific readers and writers for
-server-sent events, form data, and multipart requests.
-
-To configure or customize the readers and writers to use, applications will typically use
-`ClientCodecConfigurer` or `ServerCodecConfigurer`.
-
-
-[[webflux-codecs-jackson]]
-==== Jackson
-
-The decoder relies on Jackson's non-blocking, byte array parser to parse a stream of byte
-chunks into a `TokenBuffer` stream, which can then be turned into Objects with Jackson's
-`ObjectMapper`. JSON and https://github.com/FasterXML/smile-format-specification[Smile]
-(binary JSON) data formats are currently supported.
-
-The encoder processes a `Publisher<?>` as follows:
-
-* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded when available.
-* if media type is `application/stream+json` for JSON or `application/stream+x-jackson-smile`
-  for Smile, each value produced by the `Publisher` is encoded individually (and followed
-  by a new line in JSON).
-* otherwise all items from the `Publisher` are gathered in with `Flux#collectToList()`
-and the resulting collection is encoded as an array.
-
-As a special case to the above rules the `ServerSentEventHttpMessageWriter` feeds items
-emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
-`Mono<?>`.
-
-Note that both the Jackson JSON encoder and decoder explicitly back out of rendering
-elements of type `String`. Instead ``String``'s are treated as low level content, (i.e.
-serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
-`Flux<String>` rendered as a JSON array, you'll have to use `Flux#collectToList()` and
-provide a `Mono<List<String>>` instead.
-
-
-[[webflux-codecs-streaming]]
-==== HTTP Streaming
-[.small]#<<web.adoc#mvc-ann-async-http-streaming,Same in Spring MVC>>#
-
-When a multi-value, reactive type such as `Flux` is used for response rendering, it may
-be collected to a `List` and rendered as a whole (e.g. JSON array), or it may be treated
-as an infinite stream with each item flushed immediately. The determination for which is
-which is made based on content negotiation and the selected media type which may imply a
-streaming format (e.g. "text/event-stream", "application/stream+json"), or not
-(e.g. "application/json").
-
-When streaming to the HTTP response, regardless of the media type (e.g. text/event-stream,
-application/stream+json), it is important to send data periodically, since the write would
-fail if the client has disconnected. The send could take the form of an empty
-(comment-only) SSE event, or any other data that the other side would have to interpret as
-a heartbeat and ignore.
-
-
-
 [[webflux-filters]]
 === Filters
 [.small]#<<web.adoc#filters,Same in Spring MVC>>#
@@ -714,6 +635,80 @@ Below are the available `WebExceptionHandler` implementations:
   This handler is declared in the <<webflux-config>>.
 
 |===
+
+
+
+[[webflux-codecs]]
+=== Codecs
+[.small]#<<integration.adoc#rest-message-conversion,Same in Spring MVC>>#
+
+{api-spring-framework}/http/codec/HttpMessageReader.html[HttpMessageReader] and
+{api-spring-framework}/http/codec/HttpMessageWriter.html[HttpMessageWriter] are contracts
+for encoding and decoding HTTP request and response content via non-blocking I/O with
+(Rective Streams) back pressure.
+
+{api-spring-framework}/core/codec/Encoder.html[Encoder] and
+{api-spring-framework}/core/codec/Decoder.html[Decoder] are contracts for encoding and
+decoding content, independent of HTTP. They can be wrapped with `EncoderHttpMessageWriter`
+or `DecoderHttpMessageReader` and used for web processing.
+
+All codecs are for client or server side use. All build on
+{api-spring-framework}/core/io/buffer/DataBuffer.html[DataBuffer] which abstracts byte
+buffer representations such as the Netty `ByteBuf` or `java.nio.ByteBuffer` (see
+<<core#databuffers, Data Buffers and Codecs>> for more details). `ClientCodecConfigurer`
+and `ServerCodecConfigurer` are typically used to configure and customize the codecs to
+use in an application.
+
+The `spring-core` module has encoders and decoders for `byte[]`, `ByteBuffer`, `DataBuffer`,
+`Resource`, and `String`. The `spring-web` module adds encoders and decoders for Jackson
+JSON, Jackson Smile, JAXB2, along with other web-specific HTTP message readers and writers
+for form data, multipart requests, and server-sent events.
+
+
+[[webflux-codecs-jackson]]
+==== Jackson
+
+The decoder relies on Jackson's non-blocking, byte array parser to parse a stream of byte
+chunks into a `TokenBuffer` stream, which can then be turned into Objects with Jackson's
+`ObjectMapper`. JSON and https://github.com/FasterXML/smile-format-specification[Smile]
+(binary JSON) data formats are currently supported.
+
+The encoder processes a `Publisher<?>` as follows:
+
+* if the `Publisher` is a `Mono` (i.e. single value), the value is encoded when available.
+* if media type is `application/stream+json` for JSON or `application/stream+x-jackson-smile`
+  for Smile, each value produced by the `Publisher` is encoded individually (and followed
+  by a new line in JSON).
+* otherwise all items from the `Publisher` are gathered in with `Flux#collectToList()`
+and the resulting collection is encoded as an array.
+
+As a special case to the above rules the `ServerSentEventHttpMessageWriter` feeds items
+emitted from its input `Publisher` individually into the `Jackson2JsonEncoder` as a
+`Mono<?>`.
+
+Note that both the Jackson JSON encoder and decoder explicitly back out of rendering
+elements of type `String`. Instead ``String``'s are treated as low level content, (i.e.
+serialized JSON) and are rendered as-is by the `CharSequenceEncoder`. If you want a
+`Flux<String>` rendered as a JSON array, you'll have to use `Flux#collectToList()` and
+provide a `Mono<List<String>>` instead.
+
+
+[[webflux-codecs-streaming]]
+==== HTTP Streaming
+[.small]#<<web.adoc#mvc-ann-async-http-streaming,Same in Spring MVC>>#
+
+When a multi-value, reactive type such as `Flux` is used for response rendering, it may
+be collected to a `List` and rendered as a whole (e.g. JSON array), or it may be treated
+as an infinite stream with each item flushed immediately. The determination for which is
+which is made based on content negotiation and the selected media type which may imply a
+streaming format (e.g. "text/event-stream", "application/stream+json"), or not
+(e.g. "application/json").
+
+When streaming to the HTTP response, regardless of the media type (e.g. text/event-stream,
+application/stream+json), it is important to send data periodically, since the write would
+fail if the client has disconnected. The send could take the form of an empty
+(comment-only) SSE event, or any other data that the other side would have to interpret as
+a heartbeat and ignore.
 
 
 
@@ -948,7 +943,7 @@ The net effect is the same as if the controller had returned a `RedirectView` or
 `Rendering.redirectTo("abc").build()`, but now the controller itself can simply
 operate in terms of logical view names. A view name such as
 `redirect:/some/resource` is relative to the current application, while the view name
-`redirect:http://example.com/arbitrary/path` redirects to an absolute URL.
+`redirect:https://example.com/arbitrary/path` redirects to an absolute URL.
 
 
 [[webflux-multiple-representations]]
@@ -1530,9 +1525,9 @@ can be customized through a `WebDataBinder`, see <<mvc-ann-initbinder>>, or by r
 ==== Matrix variables
 [.small]#<<web.adoc#mvc-ann-matrix-variables,Same in Spring MVC>>#
 
-http://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
+https://tools.ietf.org/html/rfc3986#section-3.3[RFC 3986] discusses name-value pairs in
 path segments. In Spring WebFlux we refer to those as "matrix variables" based on an
-http://www.w3.org/DesignIssues/MatrixURIs.html["old post"] by Tim Berners-Lee but they
+https://www.w3.org/DesignIssues/MatrixURIs.html["old post"] by Tim Berners-Lee but they
 can be also be referred to as URI path parameters.
 
 Matrix variables can appear in any path segment, each variable separated by semicolon and
@@ -2152,19 +2147,21 @@ configure or customize message writing.
 ==== ResponseEntity
 [.small]#<<web.adoc#mvc-ann-responseentity,Same in Spring MVC>>#
 
-`ResponseEntity` is more or less identical to using <<webflux-ann-responsebody>> but based
-on a container object that specifies request headers and body. Below is an example:
+`ResponseEntity` is like <<webflux-ann-responsebody>> but with status and headers. For example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@PostMapping("/something")
+	@GetMapping("/something")
 	public ResponseEntity<String> handle() {
-		// ...
-		URI location = ...
-		return new ResponseEntity.created(location).build();
+		String body = ... ;
+		String etag = ... ;
+		return ResponseEntity.ok().eTag(etag).build(body);
 	}
 ----
+WebFlux supports using a single value <<webflux-reactive-libraries,reactive type>> to
+produce the `ResponseEntity` asynchronously, and/or single and multi-value reactive types
+for the body.
 
 
 [[webflux-ann-jackson]]
@@ -2175,7 +2172,7 @@ on a container object that specifies request headers and body. Below is an examp
 [.small]#<<web.adoc#mvc-ann-jackson,Same in Spring MVC>>#
 
 Spring WebFlux provides built-in support for
-http://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views]
+https://wiki.fasterxml.com/JacksonJsonViews[Jackson's Serialization Views]
 which allows rendering only a subset of all fields in an Object. To use it with
 `@ResponseBody` or `ResponseEntity` controller methods, use Jackson's
 `@JsonView` annotation to activate a serialization view class:
@@ -2499,7 +2496,13 @@ Javadoc for more details.
 
 
 
-[[mvc-uri-building]]
+
+include::webflux-functional.adoc[leveloffset=+1]
+
+
+
+
+[[webflux-uri-building]]
 == URI Links
 [.small]#<<web.adoc#mvc-uri-building,Same in Spring MVC>>#
 
@@ -2507,11 +2510,6 @@ This section describes various options available in the Spring Framework to prep
 
 
 include::web-uris.adoc[leveloffset=+2]
-
-
-
-
-include::webflux-functional.adoc[leveloffset=+1]
 
 
 
@@ -2525,7 +2523,7 @@ include::webflux-cors.adoc[leveloffset=+1]
 == Web Security
 [.small]#<<web.adoc#mvc-web-security,Same in Spring MVC>>#
 
-The http://projects.spring.io/spring-security/[Spring Security] project provides support
+The https://projects.spring.io/spring-security/[Spring Security] project provides support
 for protecting web applications from malicious exploits. Check out the Spring Security
 reference documentation including:
 
@@ -2538,6 +2536,124 @@ reference documentation including:
 
 
 include::webflux-view.adoc[leveloffset=+1]
+
+
+
+
+[[webflux-caching]]
+== HTTP Caching
+[.small]#<<web.adoc#mvc-caching,Same in Spring MVC>>#
+
+HTTP caching can significantly improve the performance of a web application. HTTP caching
+revolves around the "Cache-Control" response header and subsequently conditional request
+headers such as "Last-Modified" and "ETag". "Cache-Control" advises private (e.g. browser)
+and public (e.g. proxy) caches how to cache and re-use responses. An "ETag" header is used
+to make a conditional request that may result in a 304 (NOT_MODIFIED) without a body,
+if the content has not changed. "ETag" can be seen as a more sophisticated successor to
+the `Last-Modified` header.
+
+This section describes HTTP caching related options available in Spring Web MVC.
+
+
+
+[[webflux-caching-cachecontrol]]
+=== `CacheControl`
+[.small]#<<web.adoc#mvc-caching-cachecontrol,Same in Spring MVC>>#
+
+{api-spring-framework}/http/CacheControl.html[`CacheControl`] provides support for
+configuring settings related to the "Cache-Control" header and is accepted as an argument
+in a number of places:
+
+* <<webflux-caching-etag-lastmodified>>
+* <<webflux-caching-static-resources>>
+
+While https://tools.ietf.org/html/rfc7234#section-5.2.2[RFC 7234] describes all possible
+directives for the "Cache-Control" response header, the `CacheControl` type takes a
+use case oriented approach focusing on the common scenarios:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	// Cache for an hour - "Cache-Control: max-age=3600"
+	CacheControl ccCacheOneHour = CacheControl.maxAge(1, TimeUnit.HOURS);
+
+	// Prevent caching - "Cache-Control: no-store"
+	CacheControl ccNoStore = CacheControl.noStore();
+
+	// Cache for ten days in public and private caches,
+	// public caches should not transform the response
+	// "Cache-Control: max-age=864000, public, no-transform"
+	CacheControl ccCustom = CacheControl.maxAge(10, TimeUnit.DAYS).noTransform().cachePublic();
+----
+
+
+
+[[webflux-caching-etag-lastmodified]]
+=== Controllers
+[.small]#<<web.adoc#mvc-caching-etag-lastmodified,Same in Spring MVC>>#
+
+Controllers can add explicit support for HTTP caching. This is recommended since the
+lastModified or ETag value for a resource needs to be calculated before it can be compared
+against conditional request headers. A controller can add an ETag and "Cache-Control"
+settings to a `ResponseEntity`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@GetMapping("/book/{id}")
+	public ResponseEntity<Book> showBook(@PathVariable Long id) {
+
+		Book book = findBook(id);
+		String version = book.getVersion();
+
+		return ResponseEntity
+				.ok()
+				.cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+				.eTag(version) // lastModified is also available
+				.body(book);
+	}
+----
+
+This will send an 304 (NOT_MODIFIED) response with an empty body, if the comparison
+to the conditional request headers indicates the content has not changed. Otherwise the
+"ETag" and "Cache-Control" headers will be added to the response.
+
+The check against conditional request headers can also be made in the controller:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping
+	public String myHandleMethod(ServerWebExchange exchange, Model model) {
+
+		long eTag = ... <1>
+
+		if (exchange.checkNotModified(eTag)) {
+			return null; <2>
+		}
+
+		model.addAttribute(...); <3>
+		return "myViewName";
+	}
+----
+
+<1> Application-specific calculation.
+<2> Response has been set to 304 (NOT_MODIFIED), no further processing.
+<3> Continue with request processing.
+
+There are 3 variants for checking conditional requests against eTag values, lastModified
+values, or both. For conditional "GET" and "HEAD" requests, the response may be set to
+304 (NOT_MODIFIED). For conditional "POST", "PUT", and "DELETE", the response would be set
+to 409 (PRECONDITION_FAILED) instead to prevent concurrent modification.
+
+
+
+[[webflux-caching-static-resources]]
+=== Static resources
+[.small]#<<web.adoc#mvc-caching-static-resources,Same in Spring MVC>>#
+
+Static resources should be served with a "Cache-Control" and conditional response headers
+for optimal performance. See section on configuring <<webflux-config-static-resources>>.
 
 
 
@@ -2736,8 +2852,8 @@ For Jackson JSON and XML, consider using the
 {api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[Jackson2ObjectMapperBuilder]
 which customizes Jackson's default properties with the following ones:
 
-. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
-. http://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
+. https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/DeserializationFeature.html#FAIL_ON_UNKNOWN_PROPERTIES[`DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES`] is disabled.
+. https://fasterxml.github.io/jackson-databind/javadoc/2.6/com/fasterxml/jackson/databind/MapperFeature.html#DEFAULT_VIEW_INCLUSION[`MapperFeature.DEFAULT_VIEW_INCLUSION`] is disabled.
 
 It also automatically registers the following well-known modules if they are detected on the classpath:
 
@@ -2868,7 +2984,7 @@ evaluated and if present a `304` status code is returned.
 		public void addResourceHandlers(ResourceHandlerRegistry registry) {
 			registry.addResourceHandler("/resources/**")
 				.addResourceLocations("/public", "classpath:/static/")
-				.setCachePeriod(31556926);
+				.setCacheControl(CacheControl.maxAge(365, TimeUnit.DAYS));
 		}
 
 	}
@@ -2912,15 +3028,19 @@ so it can be injected into others.
 
 Unlike Spring MVC at present in WebFlux there is no way to transparently rewrite static
 resource URLs since there are no view technologies that can make use of a non-blocking chain
-of resolvers and transformers (e.g. resources on Amazon S3). When serving only local
-resources the workaround is to use `ResourceUrlProvider` directly (e.g. through a custom
-tag) and block for 0 seconds.
+of resolvers and transformers. When serving only local resources the workaround is to use
+`ResourceUrlProvider` directly (e.g. through a custom tag) and block.
 
-http://www.webjars.org/documentation[WebJars] is also supported via `WebJarsResourceResolver`
-and automatically registered when `"org.webjars:webjars-locator"` is present on the
-classpath. The resolver can re-write URLs to include the version of the jar and can also
-match to incoming URLs without versions -- e.g. `"/jquery/jquery.min.js"` to
-`"/jquery/1.2.0/jquery.min.js"`.
+Note that when using both `GzipResourceResolver` and `VersionedResourceResolver`, they must
+be registered in that order to ensure content based versions are always computed reliably
+based on the unencoded file.
+
+https://www.webjars.org/documentation[WebJars] are also supported through the
+`WebJarsResourceResolver` which is automatically registered when the
+`org.webjars:webjars-locator-core` library is present on the classpath. The resolver can
+re-write URLs to include the version of the jar and can also match against incoming URLs
+without versions -- for example, from `/jquery/jquery.min.js` to
+`/jquery/1.2.0/jquery.min.js`.
 
 
 

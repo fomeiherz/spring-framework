@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,6 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 /**
  * {@link FactoryBean} that creates a Hibernate
@@ -240,7 +239,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set a Hibernate 5.0 ImplicitNamingStrategy for the SessionFactory.
+	 * Set a Hibernate 5 {@link ImplicitNamingStrategy} for the SessionFactory.
 	 * @see Configuration#setImplicitNamingStrategy
 	 */
 	public void setImplicitNamingStrategy(ImplicitNamingStrategy implicitNamingStrategy) {
@@ -248,7 +247,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	}
 
 	/**
-	 * Set a Hibernate 5.0 PhysicalNamingStrategy for the SessionFactory.
+	 * Set a Hibernate 5 {@link PhysicalNamingStrategy} for the SessionFactory.
 	 * @see Configuration#setPhysicalNamingStrategy
 	 */
 	public void setPhysicalNamingStrategy(PhysicalNamingStrategy physicalNamingStrategy) {
@@ -351,8 +350,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * then block until Hibernate's bootstrapping completed, if not ready by then.
 	 * For maximum benefit, make sure to avoid early {@code SessionFactory} calls
 	 * in init methods of related beans, even for metadata introspection purposes.
-	 * @see LocalSessionFactoryBuilder#buildSessionFactory(AsyncTaskExecutor)
 	 * @since 4.3
+	 * @see LocalSessionFactoryBuilder#buildSessionFactory(AsyncTaskExecutor)
 	 */
 	public void setBootstrapExecutor(AsyncTaskExecutor bootstrapExecutor) {
 		this.bootstrapExecutor = bootstrapExecutor;
@@ -365,7 +364,6 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * @since 4.3
 	 */
 	public void setMetadataSources(MetadataSources metadataSources) {
-		Assert.notNull(metadataSources, "MetadataSources must not be null");
 		this.metadataSourcesAccessed = true;
 		this.metadataSources = metadataSources;
 	}
@@ -526,7 +524,7 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * <p>The default implementation invokes LocalSessionFactoryBuilder's buildSessionFactory.
 	 * A custom implementation could prepare the instance in a specific way (e.g. applying
 	 * a custom ServiceRegistry) or use a custom SessionFactoryImpl subclass.
-	 * @param sfb LocalSessionFactoryBuilder prepared by this LocalSessionFactoryBean
+	 * @param sfb a LocalSessionFactoryBuilder prepared by this LocalSessionFactoryBean
 	 * @return the SessionFactory instance
 	 * @see LocalSessionFactoryBuilder#buildSessionFactory
 	 */

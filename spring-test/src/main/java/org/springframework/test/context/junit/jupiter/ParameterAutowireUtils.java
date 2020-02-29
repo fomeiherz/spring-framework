@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -118,7 +118,8 @@ abstract class ParameterAutowireUtils {
 		Autowired autowired = AnnotatedElementUtils.findMergedAnnotation(annotatedParameter, Autowired.class);
 		boolean required = (autowired == null || autowired.required());
 
-		MethodParameter methodParameter = SynthesizingMethodParameter.forParameter(parameter);
+		MethodParameter methodParameter = SynthesizingMethodParameter.forExecutable(
+				parameter.getDeclaringExecutable(), parameterIndex);
 		DependencyDescriptor descriptor = new DependencyDescriptor(methodParameter, required);
 		descriptor.setContainingClass(containingClass);
 		return applicationContext.getAutowireCapableBeanFactory().resolveDependency(descriptor, null);

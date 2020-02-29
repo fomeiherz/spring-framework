@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,8 @@
 package org.springframework.messaging.simp.config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -64,7 +62,6 @@ import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -120,12 +117,10 @@ public class MessageBrokerConfigurationTests {
 
 		AbstractSubscribableChannel channel = context.getBean(
 				"clientInboundChannel", AbstractSubscribableChannel.class);
-
 		assertEquals(3, channel.getInterceptors().size());
 
 		CustomThreadPoolTaskExecutor taskExecutor = context.getBean(
 				"clientInboundChannelExecutor", CustomThreadPoolTaskExecutor.class);
-
 		assertEquals(11, taskExecutor.getCorePoolSize());
 		assertEquals(12, taskExecutor.getMaxPoolSize());
 		assertEquals(13, taskExecutor.getKeepAliveSeconds());
@@ -483,7 +478,6 @@ public class MessageBrokerConfigurationTests {
 		TestChannel outChannel = context.getBean("clientOutboundChannel", TestChannel.class);
 		MessageChannel brokerChannel = context.getBean("brokerChannel", MessageChannel.class);
 
-
 		// 1. Subscribe to user destination
 
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.SUBSCRIBE);
@@ -508,7 +502,6 @@ public class MessageBrokerConfigurationTests {
 		assertEquals(SimpMessageType.MESSAGE, headers.getMessageType());
 		assertEquals(expectLeadingSlash ? "/queue.q1-usersess1" : "queue.q1-usersess1", headers.getDestination());
 		assertEquals("123", new String((byte[]) outputMessage.getPayload()));
-
 
 		// 3. Send message via broker channel
 
@@ -607,7 +600,7 @@ public class MessageBrokerConfigurationTests {
 	@Configuration
 	static class CustomConfig extends BaseTestMessageBrokerConfig {
 
-		private ChannelInterceptor interceptor = new ChannelInterceptorAdapter() {};
+		private ChannelInterceptor interceptor = new ChannelInterceptor() {};
 
 		@Override
 		protected void configureClientInboundChannel(ChannelRegistration registration) {

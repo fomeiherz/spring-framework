@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -87,7 +87,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	public void onApplicationEvent(ContextRefreshedEvent event) {
 		if (this.handlerMap.isEmpty()) {
 			detectResourceHandlers(event.getApplicationContext());
-			if(logger.isDebugEnabled()) {
+			if (logger.isDebugEnabled()) {
 				logger.debug("No resource handling mappings found");
 			}
 		}
@@ -132,6 +132,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		String lookupPath = uriString.substring(0, queryIndex);
 		String query = uriString.substring(queryIndex);
 		PathContainer parsedLookupPath = PathContainer.parsePath(lookupPath);
+
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
 		}
@@ -163,8 +164,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					int endIndex = lookupPath.elements().size() - path.elements().size();
 					PathContainer mapping = lookupPath.subPath(0, endIndex);
 					if (logger.isTraceEnabled()) {
-						logger.trace("Invoking ResourceResolverChain for URL pattern " +
-								"\"" + entry.getKey() + "\"");
+						logger.trace("Invoking ResourceResolverChain for URL pattern \"" + entry.getKey() + "\"");
 					}
 					ResourceWebHandler handler = entry.getValue();
 					List<ResourceResolver> resolvers = handler.getResourceResolvers();
@@ -176,7 +176,6 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 								}
 								return mapping.value() + resolvedPath;
 							});
-
 				})
 				.orElse(Mono.empty());
 	}

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,8 +25,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.MimeUtility;
@@ -71,7 +70,7 @@ import org.springframework.util.StringUtils;
  * form.add("field 1", "value 1");
  * form.add("field 2", "value 2");
  * form.add("field 2", "value 3");
- * template.postForLocation("http://example.com/myForm", form);
+ * template.postForLocation("https://example.com/myForm", form);
  * </pre>
  *
  * <p>The following snippet shows how to do a file upload:
@@ -79,7 +78,7 @@ import org.springframework.util.StringUtils;
  * MultiValueMap&lt;String, Object&gt; parts = new LinkedMultiValueMap&lt;&gt;();
  * parts.add("field 1", "value 1");
  * parts.add("file", new ClassPathResource("myFile.jpg"));
- * template.postForLocation("http://example.com/myFileUpload", parts);
+ * template.postForLocation("https://example.com/myFileUpload", parts);
  * </pre>
  *
  * <p>Some methods in this class were inspired by
@@ -197,7 +196,7 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	 * its filename parameter) will be encoded based on the setting of
 	 * {@link #setCharset(Charset)} or {@code UTF-8} by default.
 	 * @since 4.1.1
-	 * @see <a href="http://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
+	 * @see <a href="https://en.wikipedia.org/wiki/MIME#Encoded-Word">Encoded-Word</a>
 	 */
 	public void setMultipartCharset(Charset charset) {
 		this.multipartCharset = charset;
@@ -280,8 +279,8 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		if (contentType != null) {
 			return MediaType.MULTIPART_FORM_DATA.includes(contentType);
 		}
-		for (String name : map.keySet()) {
-			for (Object value : map.get(name)) {
+		for (List<?> values : map.values()) {
+			for (Object value : values) {
 				if (value != null && !(value instanceof String)) {
 					return true;
 				}
@@ -290,35 +289,33 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		return false;
 	}
 
-	private void writeForm(MultiValueMap<String, String> form, @Nullable MediaType contentType,
+	private void writeForm(MultiValueMap<String, String> formData, @Nullable MediaType contentType,
 			HttpOutputMessage outputMessage) throws IOException {
 
-		contentType = (contentType != null ? contentType : DEFAULT_FORM_DATA_MEDIA_TYPE);
-		Charset charset = contentType.getCharset();
-		if (charset == null) {
-			charset = this.charset;
-			contentType = new MediaType(contentType, charset);
-		}
+		contentType = getMediaType(contentType);
 		outputMessage.getHeaders().setContentType(contentType);
 
+		Charset charset = contentType.getCharset();
+		Assert.notNull(charset, "No charset"); // should never occur
+
 		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> nameIterator = form.keySet().iterator(); nameIterator.hasNext();) {
-			String name = nameIterator.next();
-			for (Iterator<String> valueIterator = form.get(name).iterator(); valueIterator.hasNext();) {
-				String value = valueIterator.next();
-				builder.append(URLEncoder.encode(name, charset.name()));
-				if (value != null) {
-					builder.append('=');
-					builder.append(URLEncoder.encode(value, charset.name()));
-					if (valueIterator.hasNext()) {
-						builder.append('&');
+		formData.forEach((name, values) ->
+				values.forEach(value -> {
+					try {
+						if (builder.length() != 0) {
+							builder.append('&');
+						}
+						builder.append(URLEncoder.encode(name, charset.name()));
+						if (value != null) {
+							builder.append('=');
+							builder.append(URLEncoder.encode(value, charset.name()));
+						}
 					}
-				}
-			}
-			if (nameIterator.hasNext()) {
-				builder.append('&');
-			}
-		}
+					catch (UnsupportedEncodingException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}));
+
 		final byte[] bytes = builder.toString().getBytes(charset);
 		outputMessage.getHeaders().setContentLength(bytes.length);
 
@@ -331,15 +328,27 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 		}
 	}
 
-	private void writeMultipart(final MultiValueMap<String, Object> parts,
-			HttpOutputMessage outputMessage) throws IOException {
+	private MediaType getMediaType(@Nullable MediaType mediaType) {
+		if (mediaType == null) {
+			return DEFAULT_FORM_DATA_MEDIA_TYPE;
+		}
+		else if (mediaType.getCharset() == null) {
+			return new MediaType(mediaType, this.charset);
+		}
+		else {
+			return mediaType;
+		}
+	}
+
+	private void writeMultipart(final MultiValueMap<String, Object> parts, HttpOutputMessage outputMessage)
+			throws IOException {
 
 		final byte[] boundary = generateMultipartBoundary();
-		Map<String, String> parameters = new HashMap<>(2);
-		parameters.put("boundary", new String(boundary, "US-ASCII"));
+		Map<String, String> parameters = new LinkedHashMap<>(2);
 		if (!isFilenameCharsetSet()) {
 			parameters.put("charset", this.charset.name());
 		}
+		parameters.put("boundary", new String(boundary, StandardCharsets.US_ASCII));
 
 		MediaType contentType = new MediaType(MediaType.MULTIPART_FORM_DATA, parameters);
 		HttpHeaders headers = outputMessage.getHeaders();

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,10 +25,10 @@ import java.util.function.IntPredicate;
  * Basic abstraction over byte buffers.
  *
  * <p>{@code DataBuffer}s has a separate {@linkplain #readPosition() read} and
- * {@linkplain #writePosition() write} position, as opposed to {@code ByteBuffer}'s single
- * {@linkplain ByteBuffer#position() position}. As such, the {@code DataBuffer} does not require
- * a {@linkplain ByteBuffer#flip() flip} to read after writing. In general, the following invariant
- * holds for the read and write positions, and the capacity:
+ * {@linkplain #writePosition() write} position, as opposed to {@code ByteBuffer}'s
+ * single {@linkplain ByteBuffer#position() position}. As such, the {@code DataBuffer}
+ * does not require a {@linkplain ByteBuffer#flip() flip} to read after writing. In general,
+ * the following invariant holds for the read and write positions, and the capacity:
  *
  * <blockquote>
  *     <tt>0</tt> <tt>&lt;=</tt>
@@ -41,8 +41,8 @@ import java.util.function.IntPredicate;
  * similar to {@code StringBuilder}.
  *
  * <p>The main purpose of the {@code DataBuffer} abstraction is to provide a convenient wrapper
- * around {@link ByteBuffer} that is similar to Netty's {@link io.netty.buffer.ByteBuf}, but that
- * can also be used on non-Netty platforms (i.e. Servlet).
+ * around {@link ByteBuffer} which is similar to Netty's {@link io.netty.buffer.ByteBuf} but
+ * can also be used on non-Netty platforms (i.e. Servlet containers).
  *
  * @author Arjen Poutsma
  * @since 5.0
@@ -57,22 +57,22 @@ public interface DataBuffer {
 	DataBufferFactory factory();
 
 	/**
-	 * Return the index of the first byte in this buffer that matches the given
-	 * predicate.
+	 * Return the index of the first byte in this buffer that matches
+	 * the given predicate.
 	 * @param predicate the predicate to match
 	 * @param fromIndex the index to start the search from
-	 * @return the index of the first byte that matches {@code predicate}; or {@code -1}
-	 * if none match
+	 * @return the index of the first byte that matches {@code predicate};
+	 * or {@code -1} if none match
 	 */
 	int indexOf(IntPredicate predicate, int fromIndex);
 
 	/**
-	 * Return the index of the last byte in this buffer that matches the given
-	 * predicate.
+	 * Return the index of the last byte in this buffer that matches
+	 * the given predicate.
 	 * @param predicate the predicate to match
 	 * @param fromIndex the index to start the search from
-	 * @return the index of the last byte that matches {@code predicate}; or {@code -1}
-	 * if none match
+	 * @return the index of the last byte that matches {@code predicate};
+	 * or {@code -1} if none match
 	 */
 	int lastIndexOf(IntPredicate predicate, int fromIndex);
 
@@ -97,9 +97,10 @@ public interface DataBuffer {
 	int capacity();
 
 	/**
-	 * Sets the number of bytes that this buffer can contain. If the new capacity is lower than
-	 * the current capacity, the contents of this buffer will be truncated. If the new capacity
-	 * is higher than the current capacity, it will be expanded.
+	 * Set the number of bytes that this buffer can contain.
+	 * <p>If the new capacity is lower than the current capacity, the contents
+	 * of this buffer will be truncated. If the new capacity is higher than
+	 * the current capacity, it will be expanded.
 	 * @param capacity the new capacity
 	 * @return this buffer
 	 */
@@ -116,8 +117,8 @@ public interface DataBuffer {
 	 * Set the position from which this buffer will read.
 	 * @param readPosition the new read position
 	 * @return this buffer
-	 * @throws IndexOutOfBoundsException if {@code readPosition} is smaller than 0 or greater than
-	 * {@link #writePosition()}
+	 * @throws IndexOutOfBoundsException if {@code readPosition} is smaller than 0
+	 * or greater than {@link #writePosition()}
 	 * @since 5.0.1
 	 */
 	DataBuffer readPosition(int readPosition);
@@ -191,7 +192,7 @@ public interface DataBuffer {
 	 * Write at most {@code length} bytes of the given source into this buffer, starting
 	 * at the current writing position of this buffer.
 	 * @param source the bytes to be written into this buffer
-	 * @param offset the index withing {@code source} to start writing from
+	 * @param offset the index within {@code source} to start writing from
 	 * @param length the maximum number of bytes to be written from {@code source}
 	 * @return this buffer
 	 */
@@ -235,8 +236,8 @@ public interface DataBuffer {
 	ByteBuffer asByteBuffer();
 
 	/**
-	 * Expose a subsequence of this buffer's bytes as a {@link ByteBuffer}. Data between this
-	 * {@code DataBuffer} and the returned {@code ByteBuffer} is shared; though
+	 * Expose a subsequence of this buffer's bytes as a {@link ByteBuffer}. Data between
+	 * this {@code DataBuffer} and the returned {@code ByteBuffer} is shared; though
 	 * changes in the returned buffer's {@linkplain ByteBuffer#position() position}
 	 * will not be reflected in the reading nor writing position of this data buffer.
 	 * @param index the index at which to start the byte buffer
@@ -249,8 +250,8 @@ public interface DataBuffer {
 	/**
 	 * Expose this buffer's data as an {@link InputStream}. Both data and read position are
 	 * shared between the returned stream and this data buffer. The underlying buffer will
-	 * <strong>not</strong> be {@linkplain DataBufferUtils#release(DataBuffer) released} when the
-	 * input stream is {@linkplain InputStream#close() closed}.
+	 * <strong>not</strong> be {@linkplain DataBufferUtils#release(DataBuffer) released}
+	 * when the input stream is {@linkplain InputStream#close() closed}.
 	 * @return this data buffer as an input stream
 	 * @see #asInputStream(boolean)
 	 */

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -192,7 +192,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		}
 		Set<ProduceMediaTypeExpression> result = new LinkedHashSet<>(expressions);
 		result.removeIf(expression -> !expression.match(exchange));
-		return (result.isEmpty()) ? null : new ProducesRequestCondition(result, this.contentTypeResolver);
+		return (!result.isEmpty() ? new ProducesRequestCondition(result, this.contentTypeResolver) : null);
 	}
 
 	/**
@@ -273,7 +273,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			ProduceMediaTypeExpression expr1 = condition1.getExpressionsToCompare().get(index1);
 			ProduceMediaTypeExpression expr2 = condition2.getExpressionsToCompare().get(index2);
 			result = expr1.compareTo(expr2);
-			result = (result != 0) ? result : expr1.getMediaType().compareTo(expr2.getMediaType());
+			result = (result != 0 ? result : expr1.getMediaType().compareTo(expr2.getMediaType()));
 		}
 		return result;
 	}

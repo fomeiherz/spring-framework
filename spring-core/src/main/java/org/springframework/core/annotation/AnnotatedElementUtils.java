@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -228,8 +229,8 @@ public class AnnotatedElementUtils {
 		return hasMetaAnnotationTypes(element, null, annotationName);
 	}
 
-	private static boolean hasMetaAnnotationTypes(AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType,
-			@Nullable String annotationName) {
+	private static boolean hasMetaAnnotationTypes(
+			AnnotatedElement element, @Nullable Class<? extends Annotation> annotationType, @Nullable String annotationName) {
 
 		return Boolean.TRUE.equals(
 			searchWithGetSemantics(element, annotationType, annotationName, new SimpleAnnotationProcessor<Boolean>() {
@@ -386,13 +387,9 @@ public class AnnotatedElementUtils {
 	@Nullable
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (!(element instanceof Class)) {
-			// Do not use this shortcut against a Class: Inherited annotations
-			// would get preferred over locally declared composed annotations.
-			A annotation = element.getAnnotation(annotationType);
-			if (annotation != null) {
-				return AnnotationUtils.synthesizeAnnotation(annotation, element);
-			}
+		A annotation = element.getDeclaredAnnotation(annotationType);
+		if (annotation != null) {
+			return AnnotationUtils.synthesizeAnnotation(annotation, element);
 		}
 
 		// Exhaustive retrieval of merged annotation attributes...
@@ -443,12 +440,12 @@ public class AnnotatedElementUtils {
 	 * @param annotationType the annotation type to find (never {@code null})
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
+	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
+	 * is {@code null}, or if the container type cannot be resolved
 	 * @since 4.3
 	 * @see #getMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 * @see #getMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
-	 * is {@code null}, or if the container type cannot be resolved
 	 */
 	public static <A extends Annotation> Set<A> getMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType) {
@@ -474,13 +471,13 @@ public class AnnotatedElementUtils {
 	 * {@link java.lang.annotation.Repeatable}
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
-	 * @since 4.3
-	 * @see #getMergedAnnotation(AnnotatedElement, Class)
-	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
 	 * is {@code null}, or if the container type cannot be resolved
 	 * @throws AnnotationConfigurationException if the supplied {@code containerType}
 	 * is not a valid container annotation for the supplied {@code annotationType}
+	 * @since 4.3
+	 * @see #getMergedAnnotation(AnnotatedElement, Class)
+	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 */
 	public static <A extends Annotation> Set<A> getMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
@@ -585,22 +582,20 @@ public class AnnotatedElementUtils {
 	 * attributes of the same name from higher levels, and
 	 * {@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
-	 * algorithm used by this method will stop searching the annotation
-	 * hierarchy once the first annotation of the specified
-	 * {@code annotationType} has been found. As a consequence, additional
-	 * annotations of the specified {@code annotationType} will be ignored.
+	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search algorithm
+	 * used by this method will stop searching the annotation hierarchy once the
+	 * first annotation of the specified {@code annotationType} has been found.
+	 * As a consequence, additional annotations of the specified
+	 * {@code annotationType} will be ignored.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @param classValuesAsString whether to convert Class references into
 	 * Strings or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
-	 * instances into {@code AnnotationAttributes} maps or to preserve them
-	 * as Annotation instances
-	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
-	 * not found
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * {@code AnnotationAttributes} maps or to preserve them as Annotation instances
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
 	 * @since 4.2
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
@@ -673,13 +668,9 @@ public class AnnotatedElementUtils {
 	@Nullable
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		// Shortcut: directly present on the element, with no merging needed?
-		if (!(element instanceof Class)) {
-			// Do not use this shortcut against a Class: Inherited annotations
-			// would get preferred over locally declared composed annotations.
-			A annotation = element.getAnnotation(annotationType);
-			if (annotation != null) {
-				return AnnotationUtils.synthesizeAnnotation(annotation, element);
-			}
+		A annotation = element.getDeclaredAnnotation(annotationType);
+		if (annotation != null) {
+			return AnnotationUtils.synthesizeAnnotation(annotation, element);
 		}
 
 		// Exhaustive retrieval of merged annotation attributes...
@@ -729,12 +720,12 @@ public class AnnotatedElementUtils {
 	 * @param annotationType the annotation type to find (never {@code null})
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
+	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
+	 * is {@code null}, or if the container type cannot be resolved
 	 * @since 4.3
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 * @see #findMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
-	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
-	 * is {@code null}, or if the container type cannot be resolved
 	 */
 	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType) {
@@ -760,13 +751,13 @@ public class AnnotatedElementUtils {
 	 * {@link java.lang.annotation.Repeatable}
 	 * @return the set of all merged repeatable {@code Annotations} found,
 	 * or an empty set if none were found
-	 * @since 4.3
-	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 * @throws IllegalArgumentException if the {@code element} or {@code annotationType}
 	 * is {@code null}, or if the container type cannot be resolved
 	 * @throws AnnotationConfigurationException if the supplied {@code containerType}
 	 * is not a valid container annotation for the supplied {@code annotationType}
+	 * @since 4.3
+	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 */
 	public static <A extends Annotation> Set<A> findMergedRepeatableAnnotations(AnnotatedElement element,
 			Class<A> annotationType, @Nullable Class<? extends Annotation> containerType) {
@@ -864,19 +855,21 @@ public class AnnotatedElementUtils {
 					return result;
 				}
 
-				if (element instanceof Class) { // otherwise getAnnotations doesn't return anything new
-					List<Annotation> inheritedAnnotations = new ArrayList<>();
-					for (Annotation annotation : element.getAnnotations()) {
-						if (!declaredAnnotations.contains(annotation)) {
-							inheritedAnnotations.add(annotation);
+				if (element instanceof Class) {  // otherwise getAnnotations doesn't return anything new
+					Class<?> superclass = ((Class) element).getSuperclass();
+					if (superclass != null && superclass != Object.class) {
+						List<Annotation> inheritedAnnotations = new LinkedList<>();
+						for (Annotation annotation : element.getAnnotations()) {
+							if (!declaredAnnotations.contains(annotation)) {
+								inheritedAnnotations.add(annotation);
+							}
 						}
-					}
-
-					// Continue searching within inherited annotations
-					result = searchWithGetSemanticsInAnnotations(element, inheritedAnnotations,
-							annotationType, annotationName, containerType, processor, visited, metaDepth);
-					if (result != null) {
-						return result;
+						// Continue searching within inherited annotations
+						result = searchWithGetSemanticsInAnnotations(element, inheritedAnnotations,
+								annotationType, annotationName, containerType, processor, visited, metaDepth);
+						if (result != null) {
+							return result;
+						}
 					}
 				}
 			}
@@ -1009,7 +1002,7 @@ public class AnnotatedElementUtils {
 
 		if (containerType != null && !processor.aggregates()) {
 			throw new IllegalArgumentException(
-				"Searches for repeatable annotations must supply an aggregating Processor");
+					"Searches for repeatable annotations must supply an aggregating Processor");
 		}
 
 		try {
@@ -1136,14 +1129,13 @@ public class AnnotatedElementUtils {
 					Class<?> clazz = method.getDeclaringClass();
 					while (true) {
 						clazz = clazz.getSuperclass();
-						if (clazz == null || Object.class == clazz) {
+						if (clazz == null || clazz == Object.class) {
 							break;
 						}
 						Set<Method> annotatedMethods = AnnotationUtils.getAnnotatedMethodsInBaseType(clazz);
 						if (!annotatedMethods.isEmpty()) {
 							for (Method annotatedMethod : annotatedMethods) {
-								if (annotatedMethod.getName().equals(method.getName()) &&
-										Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+								if (AnnotationUtils.isOverride(method, annotatedMethod)) {
 									Method resolvedSuperMethod = BridgeMethodResolver.findBridgedMethod(annotatedMethod);
 									result = searchWithFindSemantics(resolvedSuperMethod, annotationType, annotationName,
 											containerType, processor, visited, metaDepth);
@@ -1163,23 +1155,23 @@ public class AnnotatedElementUtils {
 				}
 				else if (element instanceof Class) {
 					Class<?> clazz = (Class<?>) element;
-
-					// Search on interfaces
-					for (Class<?> ifc : clazz.getInterfaces()) {
-						T result = searchWithFindSemantics(ifc, annotationType, annotationName,
-								containerType, processor, visited, metaDepth);
-						if (result != null) {
-							return result;
+					if (!Annotation.class.isAssignableFrom(clazz)) {
+						// Search on interfaces
+						for (Class<?> ifc : clazz.getInterfaces()) {
+							T result = searchWithFindSemantics(ifc, annotationType, annotationName,
+									containerType, processor, visited, metaDepth);
+							if (result != null) {
+								return result;
+							}
 						}
-					}
-
-					// Search on superclass
-					Class<?> superclass = clazz.getSuperclass();
-					if (superclass != null && Object.class != superclass) {
-						T result = searchWithFindSemantics(superclass, annotationType, annotationName,
-								containerType, processor, visited, metaDepth);
-						if (result != null) {
-							return result;
+						// Search on superclass
+						Class<?> superclass = clazz.getSuperclass();
+						if (superclass != null && superclass != Object.class) {
+							T result = searchWithFindSemantics(superclass, annotationType, annotationName,
+									containerType, processor, visited, metaDepth);
+							if (result != null) {
+								return result;
+							}
 						}
 					}
 				}
@@ -1200,8 +1192,7 @@ public class AnnotatedElementUtils {
 			Set<Method> annotatedMethods = AnnotationUtils.getAnnotatedMethodsInBaseType(ifc);
 			if (!annotatedMethods.isEmpty()) {
 				for (Method annotatedMethod : annotatedMethods) {
-					if (annotatedMethod.getName().equals(method.getName()) &&
-							Arrays.equals(annotatedMethod.getParameterTypes(), method.getParameterTypes())) {
+					if (AnnotationUtils.isOverride(method, annotatedMethod)) {
 						T result = searchWithFindSemantics(annotatedMethod, annotationType, annotationName,
 								containerType, processor, visited, metaDepth);
 						if (result != null) {
@@ -1277,12 +1268,12 @@ public class AnnotatedElementUtils {
 
 	/**
 	 * Validate that the supplied {@code containerType} is a proper container
-	 * annotation for the supplied repeatable {@code annotationType} (i.e.,
+	 * annotation for the supplied repeatable {@code annotationType} (i.e.
 	 * that it declares a {@code value} attribute that holds an array of the
 	 * {@code annotationType}).
-	 * @since 4.3
 	 * @throws AnnotationConfigurationException if the supplied {@code containerType}
 	 * is not a valid container annotation for the supplied {@code annotationType}
+	 * @since 4.3
 	 */
 	private static void validateContainerType(Class<? extends Annotation> annotationType,
 			Class<? extends Annotation> containerType) {
@@ -1305,9 +1296,6 @@ public class AnnotatedElementUtils {
 		}
 	}
 
-	/**
-	 * @since 4.3
-	 */
 	private static <A extends Annotation> Set<A> postProcessAndSynthesizeAggregatedResults(AnnotatedElement element,
 			Class<A> annotationType, List<AnnotationAttributes> aggregatedResults) {
 
@@ -1322,27 +1310,24 @@ public class AnnotatedElementUtils {
 
 	/**
 	 * Callback interface that is used to process annotations during a search.
-	 * <p>Depending on the use case, a processor may choose to
-	 * {@linkplain #process} a single target annotation, multiple target
-	 * annotations, or all annotations discovered by the currently executing
-	 * search. The term "target" in this context refers to a matching
-	 * annotation (i.e., a specific annotation type that was found during
-	 * the search).
-	 * <p>Returning a non-null value from the {@link #process}
-	 * method instructs the search algorithm to stop searching further;
-	 * whereas, returning {@code null} from the {@link #process} method
-	 * instructs the search algorithm to continue searching for additional
-	 * annotations. One exception to this rule applies to processors
-	 * that {@linkplain #aggregates aggregate} results. If an aggregating
-	 * processor returns a non-null value, that value will be added to the
-	 * list of {@linkplain #getAggregatedResults aggregated results}
+	 * <p>Depending on the use case, a processor may choose to {@linkplain #process}
+	 * a single target annotation, multiple target annotations, or all annotations
+	 * discovered by the currently executing search. The term "target" in this
+	 * context refers to a matching annotation (i.e. a specific annotation type
+	 * that was found during the search).
+	 * <p>Returning a non-null value from the {@link #process} method instructs
+	 * the search algorithm to stop searching further; whereas, returning
+	 * {@code null} from the {@link #process} method instructs the search
+	 * algorithm to continue searching for additional annotations. One exception
+	 * to this rule applies to processors that {@linkplain #aggregates aggregate}
+	 * results. If an aggregating processor returns a non-null value, that value
+	 * will be added to the {@linkplain #getAggregatedResults aggregated results}
 	 * and the search algorithm will continue.
-	 * <p>Processors can optionally {@linkplain #postProcess post-process}
-	 * the result of the {@link #process} method as the search algorithm
-	 * goes back down the annotation hierarchy from an invocation of
-	 * {@link #process} that returned a non-null value down to the
-	 * {@link AnnotatedElement} that was supplied as the starting point to
-	 * the search algorithm.
+	 * <p>Processors can optionally {@linkplain #postProcess post-process} the
+	 * result of the {@link #process} method as the search algorithm goes back
+	 * down the annotation hierarchy from an invocation of {@link #process} that
+	 * returned a non-null value down to the {@link AnnotatedElement} that was
+	 * supplied as the starting point to the search algorithm.
 	 * @param <T> the type of result returned by the processor
 	 */
 	private interface Processor<T> {

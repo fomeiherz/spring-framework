@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,9 @@ import java.nio.file.StandardOpenOption;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.IntPredicate;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
@@ -335,6 +337,7 @@ public abstract class DataBufferUtils {
 								sink.next(dataBuffer);
 							}
 							catch (IOException ex) {
+								sink.next(dataBuffer);
 								sink.error(ex);
 							}
 
@@ -352,6 +355,24 @@ public abstract class DataBufferUtils {
 	 * <p>Note that the writing process does not start until the returned {@code Flux} is subscribed to.
 	 * @param source the stream of data buffers to be written
 	 * @param channel the channel to write to
+	 * @return a flux containing the same buffers as in {@code source}, that starts the writing
+	 * process when subscribed to, and that publishes any writing errors and the completion signal
+	 * @since 5.0.10
+	 */
+	public static Flux<DataBuffer> write(Publisher<DataBuffer> source, AsynchronousFileChannel channel) {
+		return write(source, channel, 0);
+	}
+
+	/**
+	 * Write the given stream of {@link DataBuffer DataBuffers} to the given {@code AsynchronousFileChannel}.
+	 * Does <strong>not</strong> close the channel when the flux is terminated, and does
+	 * <strong>not</strong> {@linkplain #release(DataBuffer) release} the data buffers in the
+	 * source. If releasing is required, then subscribe to the returned {@code Flux} with a
+	 * {@link #releaseConsumer()}.
+	 * <p>Note that the writing process does not start until the returned {@code Flux} is subscribed to.
+	 * @param source the stream of data buffers to be written
+	 * @param channel the channel to write to
+	 * @param position the file position at which the write is to begin; must be non-negative
 	 * @return a flux containing the same buffers as in {@code source}, that starts the writing
 	 * process when subscribed to, and that publishes any writing errors and the completion signal
 	 */
@@ -393,25 +414,14 @@ public abstract class DataBufferUtils {
 	public static Flux<DataBuffer> takeUntilByteCount(Publisher<DataBuffer> publisher, long maxByteCount) {
 		Assert.notNull(publisher, "Publisher must not be null");
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
-		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
+		AtomicLong countDown = new AtomicLong(maxByteCount);
 
-		return Flux.from(publisher).
-				takeWhile(dataBuffer -> {
-					int delta = -dataBuffer.readableByteCount();
-					long currentCount = byteCountDown.getAndAdd(delta);
-					return currentCount >= 0;
-				}).
-				map(dataBuffer -> {
-					long currentCount = byteCountDown.get();
-					if (currentCount >= 0) {
-						return dataBuffer;
-					}
-					else {
-						// last buffer
-						int size = (int) (currentCount + dataBuffer.readableByteCount());
-						return dataBuffer.slice(0, size);
-					}
-				});
+		return Flux.from(publisher)
+				.map(buffer -> {
+					long count = countDown.addAndGet(-buffer.readableByteCount());
+					return count >= 0 ? buffer : buffer.slice(0, buffer.readableByteCount() + (int) count);
+				})
+				.takeUntil(buffer -> countDown.get() <= 0);
 	}
 
 	/**
@@ -427,26 +437,23 @@ public abstract class DataBufferUtils {
 		Assert.isTrue(maxByteCount >= 0, "'maxByteCount' must be a positive number");
 		AtomicLong byteCountDown = new AtomicLong(maxByteCount);
 
-		return Flux.from(publisher).
-				skipUntil(dataBuffer -> {
-					int delta = -dataBuffer.readableByteCount();
-					long currentCount = byteCountDown.addAndGet(delta);
-					if(currentCount < 0) {
-						return true;
-					} else {
-						DataBufferUtils.release(dataBuffer);
+		return Flux.from(publisher)
+				.skipUntil(buffer -> {
+					int delta = -buffer.readableByteCount();
+					if (byteCountDown.addAndGet(delta) >= 0) {
+						DataBufferUtils.release(buffer);
 						return false;
 					}
-				}).
-				map(dataBuffer -> {
-					long currentCount = byteCountDown.get();
-					// slice first buffer, then let others flow through
-					if (currentCount < 0) {
-						int skip = (int) (currentCount + dataBuffer.readableByteCount());
+					return true;
+				})
+				.map(buffer -> {
+					long count = byteCountDown.get();
+					if (count < 0) {
+						int skipCount = buffer.readableByteCount() + (int) count;
 						byteCountDown.set(0);
-						return dataBuffer.slice(skip, dataBuffer.readableByteCount() - skip);
+						return buffer.slice(skipCount, buffer.readableByteCount() - skipCount);
 					}
-					return dataBuffer;
+					return buffer;
 				});
 	}
 
@@ -487,6 +494,9 @@ public abstract class DataBufferUtils {
 	 * Depending on the {@link DataBuffer} implementation, the returned buffer may be a single
 	 * buffer containing all data of the provided buffers, or it may be a true composite that
 	 * contains references to the buffers.
+	 * <p>If {@code dataBuffers} contains an error signal, then all buffers that preceded the error
+	 * will be {@linkplain #release(DataBuffer) released}, and the error is stored in the
+	 * returned {@code Mono}.
 	 * @param dataBuffers the data buffers that are to be composed
 	 * @return a buffer that is composed from the {@code dataBuffers} argument
 	 * @since 5.0.3
@@ -495,12 +505,24 @@ public abstract class DataBufferUtils {
 		Assert.notNull(dataBuffers, "'dataBuffers' must not be null");
 
 		return Flux.from(dataBuffers)
+				.onErrorResume(DataBufferUtils::exceptionDataBuffer)
 				.collectList()
 				.filter(list -> !list.isEmpty())
-				.map(list -> {
+				.flatMap(list -> {
+					for (int i = 0; i < list.size(); i++) {
+						DataBuffer dataBuffer = list.get(i);
+						if (dataBuffer instanceof ExceptionDataBuffer) {
+							list.subList(0, i).forEach(DataBufferUtils::release);
+							return Mono.error(((ExceptionDataBuffer) dataBuffer).throwable());
+						}
+					}
 					DataBufferFactory bufferFactory = list.get(0).factory();
-					return bufferFactory.join(list);
+					return Mono.just(bufferFactory.join(list));
 				});
+	}
+
+	private static Mono<DataBuffer> exceptionDataBuffer(Throwable throwable) {
+		return Mono.just(new ExceptionDataBuffer(throwable));
 	}
 
 
@@ -608,10 +630,11 @@ public abstract class DataBufferUtils {
 
 		private final AtomicBoolean completed = new AtomicBoolean();
 
+		private final AtomicReference<Throwable> error = new AtomicReference<>();
+
 		private final AtomicLong position;
 
-		@Nullable
-		private DataBuffer dataBuffer;
+		private final AtomicReference<DataBuffer> dataBuffer = new AtomicReference<>();
 
 		public AsynchronousFileChannelWriteCompletionHandler(
 				FluxSink<DataBuffer> sink, AsynchronousFileChannel channel, long position) {
@@ -628,21 +651,27 @@ public abstract class DataBufferUtils {
 
 		@Override
 		protected void hookOnNext(DataBuffer value) {
-			this.dataBuffer = value;
+			if (!this.dataBuffer.compareAndSet(null, value)) {
+				throw new IllegalStateException();
+			}
 			ByteBuffer byteBuffer = value.asByteBuffer();
 			this.channel.write(byteBuffer, this.position.get(), byteBuffer, this);
 		}
 
 		@Override
 		protected void hookOnError(Throwable throwable) {
-			this.sink.error(throwable);
+			this.error.set(throwable);
+
+			if (this.dataBuffer.get() == null) {
+				this.sink.error(throwable);
+			}
 		}
 
 		@Override
 		protected void hookOnComplete() {
 			this.completed.set(true);
 
-			if (this.dataBuffer == null) {
+			if (this.dataBuffer.get() == null) {
 				this.sink.complete();
 			}
 		}
@@ -654,11 +683,13 @@ public abstract class DataBufferUtils {
 				this.channel.write(byteBuffer, pos, byteBuffer, this);
 				return;
 			}
-			if (this.dataBuffer != null) {
-				this.sink.next(this.dataBuffer);
-				this.dataBuffer = null;
+			sinkDataBuffer();
+
+			Throwable throwable = this.error.get();
+			if (throwable != null) {
+				this.sink.error(throwable);
 			}
-			if (this.completed.get()) {
+			else if (this.completed.get()) {
 				this.sink.complete();
 			}
 			else {
@@ -668,7 +699,165 @@ public abstract class DataBufferUtils {
 
 		@Override
 		public void failed(Throwable exc, ByteBuffer byteBuffer) {
+			sinkDataBuffer();
 			this.sink.error(exc);
+		}
+
+		private void sinkDataBuffer() {
+			DataBuffer dataBuffer = this.dataBuffer.get();
+			Assert.state(dataBuffer != null, "DataBuffer should not be null");
+			this.sink.next(dataBuffer);
+			this.dataBuffer.set(null);
+		}
+	}
+
+
+	/**
+	 * DataBuffer implementation that holds a {@link Throwable}, used in {@link #join(Publisher)}.
+	 */
+	private static final class ExceptionDataBuffer implements DataBuffer {
+
+		private final Throwable throwable;
+
+
+		public ExceptionDataBuffer(Throwable throwable) {
+			this.throwable = throwable;
+		}
+
+		public Throwable throwable() {
+			return this.throwable;
+		}
+
+		// Unsupported
+
+		@Override
+		public DataBufferFactory factory() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int indexOf(IntPredicate predicate, int fromIndex) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int lastIndexOf(IntPredicate predicate, int fromIndex) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int readableByteCount() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int writableByteCount() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int capacity() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer capacity(int capacity) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int readPosition() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer readPosition(int readPosition) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public int writePosition() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer writePosition(int writePosition) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public byte getByte(int index) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public byte read() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer read(byte[] destination) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer read(byte[] destination, int offset, int length) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer write(byte b) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer write(byte[] source) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer write(byte[] source, int offset, int length) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer write(DataBuffer... buffers) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer write(ByteBuffer... buffers) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public DataBuffer slice(int index, int length) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ByteBuffer asByteBuffer() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public ByteBuffer asByteBuffer(int index, int length) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public InputStream asInputStream() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public InputStream asInputStream(boolean releaseOnClose) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public OutputStream asOutputStream() {
+			throw new UnsupportedOperationException();
 		}
 	}
 

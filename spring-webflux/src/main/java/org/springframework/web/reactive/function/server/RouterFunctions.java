@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.function.server;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -65,7 +67,8 @@ public abstract class RouterFunctions {
 	public static final String URI_TEMPLATE_VARIABLES_ATTRIBUTE =
 			RouterFunctions.class.getName() + ".uriTemplateVariables";
 
-	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER = request -> ServerResponse.notFound().build();
+	private static final HandlerFunction<ServerResponse> NOT_FOUND_HANDLER =
+			request -> ServerResponse.notFound().build();
 
 
 	/**
@@ -101,9 +104,8 @@ public abstract class RouterFunctions {
 	 * RouterFunction&lt;ServerResponse&gt; userRoutes =
 	 *   RouterFunctions.route(RequestPredicates.method(HttpMethod.GET), this::listUsers)
 	 *     .andRoute(RequestPredicates.method(HttpMethod.POST), this::createUser);
-	 *
 	 * RouterFunction&lt;ServerResponse&gt; nestedRoute =
-	 *   RouterFunctions.nest(RequestPredicates.path("/user"),userRoutes);
+	 *   RouterFunctions.nest(RequestPredicates.path("/user"), userRoutes);
 	 * </pre>
 	 * @param predicate the predicate to test
 	 * @param routerFunction the nested router function to delegate to if the predicate applies
@@ -123,7 +125,7 @@ public abstract class RouterFunctions {
 	 * For instance
 	 * <pre class="code">
 	 * Resource location = new FileSystemResource("public-resources/");
-	 * RoutingFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
+	 * RouterFunction&lt;ServerResponse&gt; resources = RouterFunctions.resources("/resources/**", location);
      * </pre>
 	 * @param pattern the pattern to match
 	 * @param location the location directory relative to which resources should be resolved
@@ -223,12 +225,13 @@ public abstract class RouterFunctions {
 		};
 	}
 
+
 	private static <T> Mono<T> wrapException(Supplier<Mono<T>> supplier) {
 		try {
 			return supplier.get();
 		}
-		catch (Throwable t) {
-			return Mono.error(t);
+		catch (Throwable ex) {
+			return Mono.error(ex);
 		}
 	}
 
@@ -301,6 +304,7 @@ public abstract class RouterFunctions {
 		}
 	}
 
+
 	static final class SameComposedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RouterFunction<T> first;
@@ -348,8 +352,8 @@ public abstract class RouterFunctions {
 			this.first.accept(visitor);
 			this.second.accept(visitor);
 		}
-
 	}
+
 
 	static final class FilteredRouterFunction<T extends ServerResponse, S extends ServerResponse>
 			implements RouterFunction<S> {
@@ -381,8 +385,8 @@ public abstract class RouterFunctions {
 		}
 	}
 
-	private static final class DefaultRouterFunction<T extends ServerResponse>
-			extends AbstractRouterFunction<T> {
+
+	private static final class DefaultRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RequestPredicate predicate;
 
@@ -412,11 +416,10 @@ public abstract class RouterFunctions {
 		public void accept(Visitor visitor) {
 			visitor.route(this.predicate, this.handlerFunction);
 		}
-
 	}
 
-	private static final class DefaultNestedRouterFunction<T extends ServerResponse>
-			extends AbstractRouterFunction<T> {
+
+	private static final class DefaultNestedRouterFunction<T extends ServerResponse> extends AbstractRouterFunction<T> {
 
 		private final RequestPredicate predicate;
 
@@ -439,10 +442,26 @@ public abstract class RouterFunctions {
 													"Nested predicate \"%s\" matches against \"%s\"",
 													this.predicate, serverRequest));
 								}
-								return this.routerFunction.route(nestedRequest);
+								return this.routerFunction.route(nestedRequest)
+										.doOnNext(match -> {
+											mergeTemplateVariables(serverRequest, nestedRequest.pathVariables());
+										});
 							}
-					)
-					.orElseGet(Mono::empty);
+					).orElseGet(Mono::empty);
+		}
+
+		@SuppressWarnings("unchecked")
+		private void mergeTemplateVariables(ServerRequest request, Map<String, String> variables) {
+			if (!variables.isEmpty()) {
+				Map<String, Object> attributes = request.attributes();
+				Map<String, String> oldVariables =
+						(Map<String, String>) request.attribute(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
+						.orElseGet(LinkedHashMap::new);
+				Map<String, String> mergedVariables = new LinkedHashMap<>(oldVariables);
+				mergedVariables.putAll(variables);
+				attributes.put(RouterFunctions.URI_TEMPLATE_VARIABLES_ATTRIBUTE,
+						Collections.unmodifiableMap(mergedVariables));
+			}
 		}
 
 		@Override
@@ -451,8 +470,8 @@ public abstract class RouterFunctions {
 			this.routerFunction.accept(visitor);
 			visitor.endNested(this.predicate);
 		}
-
 	}
+
 
 	private static class ResourcesRouterFunction extends  AbstractRouterFunction<ServerResponse> {
 
@@ -473,6 +492,7 @@ public abstract class RouterFunctions {
 			visitor.resources(this.lookupFunction);
 		}
 	}
+
 
 	private static class HandlerStrategiesResponseContext implements ServerResponse.Context {
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -244,17 +244,17 @@ public class ClassPathResource extends AbstractFileResolvingResource {
 	 * This implementation compares the underlying class path locations.
 	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj instanceof ClassPathResource) {
-			ClassPathResource otherRes = (ClassPathResource) obj;
-			return (this.path.equals(otherRes.path) &&
-					ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
-					ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
+		if (!(other instanceof ClassPathResource)) {
+			return false;
 		}
-		return false;
+		ClassPathResource otherRes = (ClassPathResource) other;
+		return (this.path.equals(otherRes.path) &&
+				ObjectUtils.nullSafeEquals(this.classLoader, otherRes.classLoader) &&
+				ObjectUtils.nullSafeEquals(this.clazz, otherRes.clazz));
 	}
 
 	/**

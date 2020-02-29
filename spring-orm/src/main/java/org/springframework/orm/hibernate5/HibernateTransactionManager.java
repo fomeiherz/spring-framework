@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -145,7 +145,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 
 	/**
 	 * Create a new HibernateTransactionManager instance.
-	 * @param sessionFactory SessionFactory to manage transactions for
+	 * @param sessionFactory the SessionFactory to manage transactions for
 	 */
 	public HibernateTransactionManager(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
@@ -199,11 +199,11 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * unwrapped to extract its target DataSource.
 	 * @see #setAutodetectDataSource
 	 * @see TransactionAwareDataSourceProxy
-	 * @see DataSourceUtils
+	 * @see org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy
 	 * @see org.springframework.jdbc.core.JdbcTemplate
 	 */
 	public void setDataSource(@Nullable DataSource dataSource) {
-		if (dataSource != null && dataSource instanceof TransactionAwareDataSourceProxy) {
+		if (dataSource instanceof TransactionAwareDataSourceProxy) {
 			// If we got a TransactionAwareDataSourceProxy, we need to perform transactions
 			// for its underlying target DataSource, else data access code won't see
 			// properly exposed transactions (i.e. transactions for the target DataSource).
@@ -336,7 +336,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	@Nullable
 	public Interceptor getEntityInterceptor() throws IllegalStateException, BeansException {
 		if (this.entityInterceptor instanceof Interceptor) {
-			return (Interceptor) entityInterceptor;
+			return (Interceptor) this.entityInterceptor;
 		}
 		else if (this.entityInterceptor instanceof String) {
 			if (this.beanFactory == null) {
@@ -777,7 +777,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * from the {@code org.springframework.dao} hierarchy.
 	 * <p>Will automatically apply a specified SQLExceptionTranslator to a
 	 * Hibernate JDBCException, else rely on Hibernate's default translation.
-	 * @param ex HibernateException that occurred
+	 * @param ex the HibernateException that occurred
 	 * @return a corresponding DataAccessException
 	 * @see SessionFactoryUtils#convertHibernateAccessException
 	 */

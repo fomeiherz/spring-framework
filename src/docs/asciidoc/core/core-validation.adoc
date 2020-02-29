@@ -207,7 +207,7 @@ Oracle. A JavaBean is simply a class with a default no-argument constructor, whi
 a naming convention where (by way of an example) a property named `bingoMadness` would
 have a setter method `setBingoMadness(..)` and a getter method `getBingoMadness()`. For
 more information about JavaBeans and the specification, please refer to Oracle's website (
-http://docs.oracle.com/javase/6/docs/api/java/beans/package-summary.html[javabeans]).
+https://docs.oracle.com/javase/6/docs/api/java/beans/package-summary.html[javabeans]).
 
 One quite important class in the beans package is the `BeanWrapper` interface and its
 corresponding implementation ( `BeanWrapperImpl`). As quoted from the javadocs, the
@@ -362,10 +362,9 @@ the knowledge of how to convert properties to the desired type. Read more about
 A couple of examples where property editing is used in Spring:
 
 * __setting properties on beans__ is done using `PropertyEditors`. When mentioning
-  `java.lang.String` as the value of a property of some bean you're declaring in XML
-  file, Spring will (if the setter of the corresponding property has a
-  `Class`-parameter) use the `ClassEditor` to try to resolve the parameter to a `Class`
-  object.
+  `String` as the value of a property of some bean you're declaring in XML file,
+  Spring will (if the setter of the corresponding property has  `Class` parameter)
+  use the `ClassEditor` to try to resolve the parameter to a `Class` object.
 * __parsing HTTP request parameters__ in Spring's MVC framework is done using all kinds
   of `PropertyEditors` that you can manually bind in all subclasses of the
   `CommandController`.
@@ -462,7 +461,7 @@ com
 
 Note that you can also use the standard `BeanInfo` JavaBeans mechanism here as well
 (described
-http://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[in
+https://docs.oracle.com/javase/tutorial/javabeans/advanced/customization.html[in
 not-amazing-detail here]). Find below an example of using the `BeanInfo` mechanism for
 explicitly registering one or more `PropertyEditor` instances with the properties of an
 associated class.
@@ -725,7 +724,6 @@ The SPI to implement type conversion logic is simple and strongly typed:
 	public interface Converter<S, T> {
 
 		T convert(S source);
-
 	}
 ----
 
@@ -754,7 +752,6 @@ Consider `StringToInteger` as an example for a typical `Converter` implementatio
 		public Integer convert(String source) {
 			return Integer.valueOf(source);
 		}
-
 	}
 ----
 
@@ -763,9 +760,9 @@ Consider `StringToInteger` as an example for a typical `Converter` implementatio
 [[core-convert-ConverterFactory-SPI]]
 === ConverterFactory
 
-When you need to centralize the conversion logic for an entire class hierarchy, for
-example, when converting from String to java.lang.Enum objects, implement
-`ConverterFactory`:
+When you need to centralize the conversion logic for an entire class hierarchy
+(for example, when converting from `String` to `Enum` objects), you can implement
+`ConverterFactory`, as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -775,15 +772,14 @@ example, when converting from String to java.lang.Enum objects, implement
 	public interface ConverterFactory<S, R> {
 
 		<T extends R> Converter<S, T> getConverter(Class<T> targetType);
-
 	}
 ----
 
 Parameterize S to be the type you are converting from and R to be the base type defining
-the __range__ of classes you can convert to. Then implement getConverter(Class<T>),
+the __range__ of classes you can convert to. Then implement `getConverter(Class<T>)`,
 where T is a subclass of R.
 
-Consider the `StringToEnum` ConverterFactory as an example:
+Consider the `StringToEnumConverterFactory` as an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -816,12 +812,13 @@ Consider the `StringToEnum` ConverterFactory as an example:
 [[core-convert-GenericConverter-SPI]]
 === GenericConverter
 
-When you require a sophisticated Converter implementation, consider the GenericConverter
-interface. With a more flexible but less strongly typed signature, a GenericConverter
-supports converting between multiple source and target types. In addition, a
-GenericConverter makes available source and target field context you can use when
-implementing your conversion logic. Such context allows a type conversion to be driven
-by a field annotation, or generic information declared on a field signature.
+When you require a sophisticated `Converter` implementation, consider using the
+`GenericConverter` interface. With a more flexible but less strongly typed signature
+than `Converter`, a `GenericConverter` supports converting between multiple source and
+target types. In addition, a `GenericConverter` makes available source and target field
+context that you can use when you implement your conversion logic. Such context lets a
+type conversion be driven by a field annotation or by generic information declared on a
+field signature. The following listing shows the interface definition of `GenericConverter`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -833,26 +830,25 @@ by a field annotation, or generic information declared on a field signature.
 		public Set<ConvertiblePair> getConvertibleTypes();
 
 		Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType);
-
 	}
 ----
 
-To implement a GenericConverter, have getConvertibleTypes() return the supported
-source->target type pairs. Then implement convert(Object, TypeDescriptor,
-TypeDescriptor) to implement your conversion logic. The source TypeDescriptor provides
-access to the source field holding the value being converted. The target TypeDescriptor
-provides access to the target field where the converted value will be set.
+To implement a `GenericConverter`, have `getConvertibleTypes()` return the supported
+source->target type pairs. Then implement `convert(Object, TypeDescriptor,
+TypeDescriptor)` to contain your conversion logic. The source `TypeDescriptor` provides
+access to the source field that holds the value being converted. The target `TypeDescriptor`
+provides access to the target field where the converted value is to be set.
 
-A good example of a GenericConverter is a converter that converts between a Java Array
-and a Collection. Such an ArrayToCollectionConverter introspects the field that declares
-the target Collection type to resolve the Collection's element type. This allows each
-element in the source array to be converted to the Collection element type before the
-Collection is set on the target field.
+A good example of a `GenericConverter` is a converter that converts between a Java array
+and a collection. Such an `ArrayToCollectionConverter` introspects the field that declares
+the target collection type to resolve the collection's element type. This lets each
+element in the source array be converted to the collection element type before the
+collection is set on the target field.
 
 [NOTE]
 ====
-Because GenericConverter is a more complex SPI interface, only use it when you need it.
-Favor Converter or ConverterFactory for basic type conversion needs.
+Because `GenericConverter` is a more complex SPI interface, only use it when you need it.
+Favor `Converter` or `ConverterFactory` for basic type conversion needs.
 ====
 
 
@@ -872,12 +868,9 @@ such as a `static valueOf` method, is defined on the target class.
 	public interface ConditionalConverter {
 
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
-
 	}
 
-	public interface ConditionalGenericConverter
-		extends GenericConverter, ConditionalConverter {
-
+	public interface ConditionalGenericConverter extends GenericConverter, ConditionalConverter {
 	}
 ----
 
@@ -1051,11 +1044,11 @@ general __core.convert__ Converter SPI does not address such __formatting__ requ
 directly. To directly address them, Spring 3 introduces a convenient Formatter SPI that
 provides a simple and robust alternative to PropertyEditors for client environments.
 
-In general, use the Converter SPI when you need to implement general-purpose type
-conversion logic; for example, for converting between a java.util.Date and and
-java.lang.Long. Use the Formatter SPI when you're working in a client environment, such
-as a web application, and need to parse and print localized field values. The
-ConversionService provides a unified type conversion API for both SPIs.
+In general, you can use the `Converter` SPI when you need to implement general-purpose type
+conversion logic -- for example, for converting between a `java.util.Date` and a `Long`.
+You can use the `Formatter` SPI when you work in a client environment (such as a web
+application) and need to parse and print localized field values. The `ConversionService`
+provides a unified type conversion API for both SPIs.
 
 
 
@@ -1079,6 +1072,7 @@ Where Formatter extends from the Printer and Parser building-block interfaces:
 [subs="verbatim,quotes"]
 ----
 	public interface Printer<T> {
+
 		String print(T fieldValue, Locale locale);
 	}
 ----
@@ -1089,26 +1083,27 @@ Where Formatter extends from the Printer and Parser building-block interfaces:
 	import java.text.ParseException;
 
 	public interface Parser<T> {
+
 		T parse(String clientValue, Locale locale) throws ParseException;
 	}
 ----
 
-To create your own Formatter, simply implement the Formatter interface above.
-Parameterize T to be the type of object you wish to format, for example,
-`java.util.Date`. Implement the `print()` operation to print an instance of T for
+To create your own `Formatter`, implement the `Formatter` interface shown earlier.
+Parameterize `T` to be the type of object you wish to format -- for example,
+`java.util.Date`. Implement the `print()` operation to print an instance of `T` for
 display in the client locale. Implement the `parse()` operation to parse an instance of
-T from the formatted representation returned from the client locale. Your Formatter
-should throw a ParseException or IllegalArgumentException if a parse attempt fails. Take
-care to ensure your Formatter implementation is thread-safe.
+`T` from the formatted representation returned from the client locale. Your `Formatter`
+should throw a `ParseException` or an `IllegalArgumentException` if a parse attempt fails. Take
+care to ensure that your `Formatter` implementation is thread-safe.
 
-Several Formatter implementations are provided in `format` subpackages as a convenience.
-The `number` package provides a `NumberFormatter`, `CurrencyFormatter`, and
-`PercentFormatter` to format `java.lang.Number` objects using a `java.text.NumberFormat`.
+The `format` subpackages provide several `Formatter` implementations as a convenience.
+The `number` package provides `NumberStyleFormatter`, `CurrencyStyleFormatter`, and
+`PercentStyleFormatter` to format `Number` objects that use a `java.text.NumberFormat`.
 The `datetime` package provides a `DateFormatter` to format `java.util.Date` objects with
 a `java.text.DateFormat`. The `datetime.joda` package provides comprehensive datetime
 formatting support based on the http://joda-time.sourceforge.net[Joda-Time library].
 
-Consider `DateFormatter` as an example `Formatter` implementation:
+The following `DateFormatter` is an example `Formatter` implementation:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1142,7 +1137,6 @@ Consider `DateFormatter` as an example `Formatter` implementation:
 			dateFormat.setLenient(false);
 			return dateFormat;
 		}
-
 	}
 ----
 
@@ -1169,7 +1163,6 @@ an Annotation to a formatter, implement AnnotationFormatterFactory:
 		Printer<?> getPrinter(A annotation, Class<?> fieldType);
 
 		Parser<?> getParser(A annotation, Class<?> fieldType);
-
 	}
 ----
 
@@ -1203,18 +1196,17 @@ specified:
 			return configureFormatterFrom(annotation, fieldType);
 		}
 
-		private Formatter<Number> configureFormatterFrom(NumberFormat annotation,
-				Class<?> fieldType) {
+		private Formatter<Number> configureFormatterFrom(NumberFormat annotation, Class<?> fieldType) {
 			if (!annotation.pattern().isEmpty()) {
-				return new NumberFormatter(annotation.pattern());
+				return new NumberStyleFormatter(annotation.pattern());
 			} else {
 				Style style = annotation.style();
 				if (style == Style.PERCENT) {
-					return new PercentFormatter();
+					return new PercentStyleFormatter();
 				} else if (style == Style.CURRENCY) {
-					return new CurrencyFormatter();
+					return new CurrencyStyleFormatter();
 				} else {
-					return new NumberFormatter();
+					return new NumberStyleFormatter();
 				}
 			}
 		}
@@ -1230,7 +1222,6 @@ To trigger formatting, simply annotate fields with @NumberFormat:
 
 		@NumberFormat(style=Style.CURRENCY)
 		private BigDecimal decimal;
-
 	}
 ----
 
@@ -1239,10 +1230,11 @@ To trigger formatting, simply annotate fields with @NumberFormat:
 ==== Format Annotation API
 
 A portable format annotation API exists in the `org.springframework.format.annotation`
-package. Use @NumberFormat to format java.lang.Number fields. Use @DateTimeFormat to
-format java.util.Date, java.util.Calendar, java.util.Long, or Joda-Time fields.
+package. You can use `@NumberFormat` to format `Number` fields such as `Double` and
+`Long`, and `@DateTimeFormat` to format `java.util.Date`, `java.util.Calendar`, `Long`
+(for millisecond timestamps) as well as JSR-310 `java.time` and Joda-Time value types.
 
-The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date
+The following example uses `@DateTimeFormat` to format a `java.util.Date` as an ISO Date
 (yyyy-MM-dd):
 
 [source,java,indent=0]
@@ -1252,7 +1244,6 @@ The example below uses @DateTimeFormat to format a java.util.Date as a ISO Date
 
 		@DateTimeFormat(iso=ISO.DATE)
 		private Date date;
-
 	}
 ----
 
@@ -1284,7 +1275,6 @@ Review the FormatterRegistry SPI below:
 		void addFormatterForFieldType(Formatter<?> formatter);
 
 		void addFormatterForAnnotation(AnnotationFormatterFactory<?, ?> factory);
-
 	}
 ----
 
@@ -1312,7 +1302,6 @@ FormatterRegistry:
 	public interface FormatterRegistrar {
 
 		void registerFormatters(FormatterRegistry registry);
-
 	}
 ----
 
@@ -1386,7 +1375,7 @@ Time:
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans
-			http://www.springframework.org/schema/beans/spring-beans.xsd>
+			https://www.springframework.org/schema/beans/spring-beans.xsd>
 
 		<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
 			<property name="registerDefaultFormatters" value="false" />
@@ -1470,14 +1459,13 @@ JSR-303 allows you to define declarative validation constraints against such pro
 
 		@Min(0)
 		private int age;
-
 	}
 ----
 
 When an instance of this class is validated by a JSR-303 Validator, these constraints
 will be enforced.
 
-For general information on JSR-303/JSR-349, see the http://beanvalidation.org/[Bean
+For general information on JSR-303/JSR-349, see the https://beanvalidation.org/[Bean
 Validation website]. For information on the specific capabilities of the default
 reference implementation, see the https://www.hibernate.org/412.html[Hibernate
 Validator] documentation. To learn how to setup a Bean Validation provider as a Spring
@@ -1543,7 +1531,6 @@ the Spring Validation API:
 
 		@Autowired
 		private Validator validator;
-
 	}
 ----
 
@@ -1555,7 +1542,7 @@ Each Bean Validation constraint consists of two parts. First, a `@Constraint` an
 that declares the constraint and its configurable properties. Second, an implementation
 of the `javax.validation.ConstraintValidator` interface that implements the constraint's
 behavior. To associate a declaration with an implementation, each `@Constraint` annotation
-references a corresponding ValidationConstraint implementation class. At runtime, a
+references a corresponding `ConstraintValidator` implementation class. At runtime, a
 `ConstraintValidatorFactory` instantiates the referenced implementation when the
 constraint annotation is encountered in your domain model.
 

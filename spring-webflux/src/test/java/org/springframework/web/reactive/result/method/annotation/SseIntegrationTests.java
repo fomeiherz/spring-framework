@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,13 +57,13 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	private WebClient webClient;
 
 
+
 	@Override
 	@Before
 	public void setup() throws Exception {
 		super.setup();
 		this.webClient = WebClient.create("http://localhost:" + this.port + "/sse");
 	}
-
 
 	@Override
 	protected HttpHandler createHttpHandler() {
@@ -177,7 +177,7 @@ public class SseIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 	@RequestMapping("/sse")
 	static class SseController {
 
-		private static final Flux<Long> INTERVAL = interval(Duration.ofMillis(100), 50);
+		private static final Flux<Long> INTERVAL = testInterval(Duration.ofMillis(100), 50);
 
 		private MonoProcessor<Void> cancellation = MonoProcessor.create();
 

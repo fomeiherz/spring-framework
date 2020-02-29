@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -318,6 +318,7 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 			}
 			int remaining = dataBuffer.readableByteCount();
 			if (ready && remaining > 0) {
+				// In case of IOException, onError handling should call discardData(DataBuffer)..
 				int written = writeToOutputStream(dataBuffer);
 				if (this.logger.isTraceEnabled()) {
 					this.logger.trace("written: " + written + " total: " + remaining);
@@ -336,6 +337,11 @@ class ServletServerHttpResponse extends AbstractListenerServerHttpResponse {
 		@Override
 		protected void writingComplete() {
 			bodyProcessor = null;
+		}
+
+		@Override
+		protected void discardData(DataBuffer dataBuffer) {
+			DataBufferUtils.release(dataBuffer);
 		}
 	}
 

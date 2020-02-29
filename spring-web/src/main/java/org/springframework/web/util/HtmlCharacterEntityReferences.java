@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,7 +55,7 @@ class HtmlCharacterEntityReferences {
 
 	private final String[] characterToEntityReferenceMap = new String[3000];
 
-	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(252);
+	private final Map<String, Character> entityReferenceToCharacterMap = new HashMap<>(512);
 
 
 	/**
@@ -124,7 +124,7 @@ class HtmlCharacterEntityReferences {
 	 */
 	@Nullable
 	public String convertToReference(char character) {
-	   return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
+		return convertToReference(character, WebUtils.DEFAULT_CHARACTER_ENCODING);
 	}
 
 	/**

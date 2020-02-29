@@ -1,22 +1,15 @@
 description = "Spring Core"
 
-apply plugin: "io.spring.dependency-management"
-
 dependencyManagement {
 	imports {
 		mavenBom "io.projectreactor:reactor-bom:${reactorVersion}"
 		mavenBom "io.netty:netty-bom:${nettyVersion}"
 	}
-	resolutionStrategy {
-		cacheChangingModulesFor 0, 'seconds'
-	}
-	applyMavenExclusions = false
 }
 
-// As of Spring 4.0.3, spring-core includes asm 5.x and repackages cglib 3.2, inlining
-// both into the spring-core jar. cglib 3.2 itself depends on asm 5.x and is therefore
-// further transformed by the JarJar task to depend on org.springframework.asm; this
-// avoids including two different copies of asm unnecessarily.
+// spring-core includes asm and repackages cglib, inlining both into the spring-core jar.
+// cglib itself depends on asm and is therefore further transformed by the JarJar task to
+// depend on org.springframework.asm; this avoids including two different copies of asm.
 def cglibVersion = "3.2.6"
 def objenesisVersion = "2.6"
 
@@ -87,6 +80,7 @@ dependencies {
 	optional("io.netty:netty-buffer")
 	testCompile("io.projectreactor:reactor-test")
 	testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+	testCompile("com.google.code.findbugs:jsr305:3.0.2")
 	testCompile("org.xmlunit:xmlunit-matchers:2.5.1")
 	testCompile("javax.xml.bind:jaxb-api:2.3.0")
 	testCompile("com.fasterxml.woodstox:woodstox-core:5.0.3") {

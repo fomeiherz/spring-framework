@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -199,8 +199,8 @@ public class ServerSentEventHttpMessageWriter implements HttpMessageWriter<Objec
 			@Nullable MediaType mediaType, ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (this.encoder instanceof HttpMessageEncoder) {
-			HttpMessageEncoder<?> httpEncoder = (HttpMessageEncoder<?>) this.encoder;
-			return httpEncoder.getEncodeHints(actualType, elementType, mediaType, request, response);
+			HttpMessageEncoder<?> encoder = (HttpMessageEncoder<?>) this.encoder;
+			return encoder.getEncodeHints(actualType, elementType, mediaType, request, response);
 		}
 		return Collections.emptyMap();
 	}

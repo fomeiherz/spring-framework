@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,27 +20,25 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 
 /**
- * Helps to configure a list of client-side HTTP message readers and writers
- * with support for built-in defaults and options to register additional custom
- * readers and writers via {@link #customCodecs()}.
- *
- * <p>The built-in defaults include basic data types such as various byte
- * representations, resources, strings, forms, but also others like JAXB2 and
- * Jackson 2 based on classpath detection. There are options to
- * {@link #defaultCodecs() override} some of the defaults or to have them
- * {@link #registerDefaults(boolean) turned off} completely.
+ * Extension of {@link CodecConfigurer} for HTTP message reader and writer
+ * options relevant on the client side.
  *
  * @author Rossen Stoyanchev
  * @since 5.0
  */
 public interface ClientCodecConfigurer extends CodecConfigurer {
 
+	/**
+	 * {@inheritDoc}
+	 * <p>On the client side, built-in default also include customizations related
+	 * to multipart readers and writers, as well as the decoder for SSE.
+	 */
 	@Override
 	ClientDefaultCodecs defaultCodecs();
 
 
 	/**
-	 * Create a new instance of the {@code ClientCodecConfigurer}.
+	 * Static factory method for a {@code ClientCodecConfigurer}.
 	 */
 	static ClientCodecConfigurer create() {
 		return CodecConfigurerFactory.create(ClientCodecConfigurer.class);
@@ -48,7 +46,7 @@ public interface ClientCodecConfigurer extends CodecConfigurer {
 
 
 	/**
-	 * Extension of {@link CodecConfigurer.DefaultCodecs} with extra client options.
+	 * {@link CodecConfigurer.DefaultCodecs} extension with extra client-side options.
 	 */
 	interface ClientDefaultCodecs extends DefaultCodecs {
 

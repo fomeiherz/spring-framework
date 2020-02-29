@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+
 import org.springframework.beans.BeanMetadataElement;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
@@ -42,6 +44,7 @@ import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -78,6 +81,8 @@ class ConstructorResolver {
 
 	private final AbstractAutowireCapableBeanFactory beanFactory;
 
+	private final Log logger;
+
 
 	/**
 	 * Create a new ConstructorResolver for the given factory and instantiation strategy.
@@ -85,6 +90,7 @@ class ConstructorResolver {
 	 */
 	public ConstructorResolver(AbstractAutowireCapableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		this.logger = beanFactory.getLogger();
 	}
 
 
@@ -102,8 +108,8 @@ class ConstructorResolver {
 	 * or {@code null} if none (-> use constructor argument values from bean definition)
 	 * @return a BeanWrapper for the new instance
 	 */
-	public BeanWrapper autowireConstructor(final String beanName, final RootBeanDefinition mbd,
-			@Nullable Constructor<?>[] chosenCtors, @Nullable final Object[] explicitArgs) {
+	public BeanWrapper autowireConstructor(String beanName, RootBeanDefinition mbd,
+			@Nullable Constructor<?>[] chosenCtors, @Nullable Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -135,7 +141,7 @@ class ConstructorResolver {
 		if (constructorToUse == null) {
 			// Need to resolve the constructor.
 			boolean autowiring = (chosenCtors != null ||
-					mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+					mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 			ConstructorArgumentValues resolvedValues = null;
 
 			int minNrOfArgs;
@@ -193,9 +199,8 @@ class ConstructorResolver {
 								getUserDeclaredConstructor(candidate), autowiring);
 					}
 					catch (UnsatisfiedDependencyException ex) {
-						if (this.beanFactory.logger.isTraceEnabled()) {
-							this.beanFactory.logger.trace(
-									"Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
+						if (logger.isTraceEnabled()) {
+							logger.trace("Ignoring constructor [" + candidate + "] of bean '" + beanName + "': " + ex);
 						}
 						// Swallow and try next constructor.
 						if (causes == null) {
@@ -322,7 +327,7 @@ class ConstructorResolver {
 	 * the {@link RootBeanDefinition#isNonPublicAccessAllowed()} flag.
 	 * Called as the starting point for factory method determination.
 	 */
-	private Method[] getCandidateMethods(final Class<?> factoryClass, final RootBeanDefinition mbd) {
+	private Method[] getCandidateMethods(Class<?> factoryClass, RootBeanDefinition mbd) {
 		if (System.getSecurityManager() != null) {
 			return AccessController.doPrivileged((PrivilegedAction<Method[]>) () ->
 					(mbd.isNonPublicAccessAllowed() ?
@@ -350,7 +355,7 @@ class ConstructorResolver {
 	 * @return a BeanWrapper for the new instance
 	 */
 	public BeanWrapper instantiateUsingFactoryMethod(
-			final String beanName, final RootBeanDefinition mbd, @Nullable final Object[] explicitArgs) {
+			String beanName, RootBeanDefinition mbd, @Nullable Object[] explicitArgs) {
 
 		BeanWrapperImpl bw = new BeanWrapperImpl();
 		this.beanFactory.initBeanWrapper(bw);
@@ -413,17 +418,17 @@ class ConstructorResolver {
 			factoryClass = ClassUtils.getUserClass(factoryClass);
 
 			Method[] rawCandidates = getCandidateMethods(factoryClass, mbd);
-			List<Method> candidateSet = new ArrayList<>();
+			List<Method> candidateList = new ArrayList<>();
 			for (Method candidate : rawCandidates) {
 				if (Modifier.isStatic(candidate.getModifiers()) == isStatic && mbd.isFactoryMethod(candidate)) {
-					candidateSet.add(candidate);
+					candidateList.add(candidate);
 				}
 			}
-			Method[] candidates = candidateSet.toArray(new Method[0]);
+			Method[] candidates = candidateList.toArray(new Method[0]);
 			AutowireUtils.sortFactoryMethods(candidates);
 
 			ConstructorArgumentValues resolvedValues = null;
-			boolean autowiring = (mbd.getResolvedAutowireMode() == RootBeanDefinition.AUTOWIRE_CONSTRUCTOR);
+			boolean autowiring = (mbd.getResolvedAutowireMode() == AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR);
 			int minTypeDiffWeight = Integer.MAX_VALUE;
 			Set<Method> ambiguousFactoryMethods = null;
 
@@ -452,7 +457,7 @@ class ConstructorResolver {
 				if (paramTypes.length >= minNrOfArgs) {
 					ArgumentsHolder argsHolder;
 
-					if (explicitArgs != null){
+					if (explicitArgs != null) {
 						// Explicit arguments given -> arguments length must match exactly.
 						if (paramTypes.length != explicitArgs.length) {
 							continue;
@@ -471,9 +476,8 @@ class ConstructorResolver {
 									beanName, mbd, resolvedValues, bw, paramTypes, paramNames, candidate, autowiring);
 						}
 						catch (UnsatisfiedDependencyException ex) {
-							if (this.beanFactory.logger.isTraceEnabled()) {
-								this.beanFactory.logger.trace("Ignoring factory method [" + candidate +
-										"] of bean '" + beanName + "': " + ex);
+							if (logger.isTraceEnabled()) {
+								logger.trace("Ignoring factory method [" + candidate + "] of bean '" + beanName + "': " + ex);
 							}
 							// Swallow and try next overloaded factory method.
 							if (causes == null) {
@@ -526,7 +530,7 @@ class ConstructorResolver {
 						argTypes.add(arg != null ? arg.getClass().getSimpleName() : "null");
 					}
 				}
-				else if (resolvedValues != null){
+				else if (resolvedValues != null) {
 					Set<ValueHolder> valueHolders = new LinkedHashSet<>(resolvedValues.getArgumentCount());
 					valueHolders.addAll(resolvedValues.getIndexedArgumentValues().values());
 					valueHolders.addAll(resolvedValues.getGenericArgumentValues());
@@ -733,8 +737,8 @@ class ConstructorResolver {
 
 		for (String autowiredBeanName : autowiredBeanNames) {
 			this.beanFactory.registerDependentBean(autowiredBeanName, beanName);
-			if (this.beanFactory.logger.isDebugEnabled()) {
-				this.beanFactory.logger.debug("Autowiring by type from bean name '" + beanName +
+			if (logger.isDebugEnabled()) {
+				logger.debug("Autowiring by type from bean name '" + beanName +
 						"' via " + (executable instanceof Constructor ? "constructor" : "factory method") +
 						" to bean named '" + autowiredBeanName + "'");
 			}

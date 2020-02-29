@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -56,9 +56,9 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	private static final Object NO_VALUE = new Object();
 
 
-	private final List<MediaType> mediaTypes = new ArrayList<>(4);
-
 	private final ReactiveAdapterRegistry adapterRegistry;
+
+	private final List<MediaType> mediaTypes = new ArrayList<>(4);
 
 	private Charset defaultCharset = StandardCharsets.UTF_8;
 
@@ -73,9 +73,9 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 		this(ReactiveAdapterRegistry.getSharedInstance());
 	}
 
-	public AbstractView(ReactiveAdapterRegistry registry) {
+	public AbstractView(ReactiveAdapterRegistry reactiveAdapterRegistry) {
+		this.adapterRegistry = reactiveAdapterRegistry;
 		this.mediaTypes.add(ViewResolverSupport.DEFAULT_CONTENT_TYPE);
-		this.adapterRegistry = registry;
 	}
 
 
@@ -155,7 +155,7 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 
 	/**
 	 * Prepare the model to render.
-	 * @param model Map with name Strings as keys and corresponding model
+	 * @param model a Map with name Strings as keys and corresponding model
 	 * objects as values (Map can also be {@code null} in case of empty model)
 	 * @param contentType the content type selected to render with which should
 	 * match one of the {@link #getSupportedMediaTypes() supported media types}.
@@ -209,7 +209,6 @@ public abstract class AbstractView implements View, ApplicationContextAware {
 	 * @return {@code Mono} for the completion of async attributes resolution
 	 */
 	protected Mono<Void> resolveAsyncAttributes(Map<String, Object> model) {
-
 		List<String> names = new ArrayList<>();
 		List<Mono<?>> valueMonos = new ArrayList<>();
 

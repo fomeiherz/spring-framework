@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,7 @@ import org.springframework.jdbc.CannotGetJdbcConnectionException;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.lang.Nullable;
 import org.springframework.util.NumberUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use
@@ -452,7 +453,7 @@ public abstract class JdbcUtils {
 	 */
 	public static String lookupColumnName(ResultSetMetaData resultSetMetaData, int columnIndex) throws SQLException {
 		String name = resultSetMetaData.getColumnLabel(columnIndex);
-		if (name == null || name.length() < 1) {
+		if (!StringUtils.hasLength(name)) {
 			name = resultSetMetaData.getColumnName(columnIndex);
 		}
 		return name;

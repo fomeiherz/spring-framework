@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,7 +39,7 @@ import org.springframework.lang.Nullable;
  * Miscellaneous {@link String} utility methods.
  *
  * <p>Mainly for internal use within the framework; consider
- * <a href="http://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
+ * <a href="https://commons.apache.org/proper/commons-lang/">Apache's Commons Lang</a>
  * for a more comprehensive suite of {@code String} utilities.
  *
  * <p>This class delivers some simple functionality that should really be
@@ -75,15 +75,20 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 
 	/**
-	 * Check whether the given {@code String} is empty.
+	 * Check whether the given object (possibly a {@code String}) is empty.
+	 * This is effectly a shortcut for {@code !hasLength(String)}.
 	 * <p>This method accepts any Object as an argument, comparing it to
 	 * {@code null} and the empty String. As a consequence, this method
 	 * will never return {@code true} for a non-null non-String object.
 	 * <p>The Object signature is useful for general attribute handling code
 	 * that commonly deals with Strings but generally has to iterate over
 	 * Objects since attributes may e.g. be primitive value objects as well.
-	 * @param str the candidate String
+	 * <p><b>Note: If the object is typed to {@code String} upfront, prefer
+	 * {@link #hasLength(String)} or {@link #hasText(String)} instead.</b>
+	 * @param str the candidate object (possibly a {@code String})
 	 * @since 3.2.1
+	 * @see #hasLength(String)
+	 * @see #hasText(String)
 	 */
 	public static boolean isEmpty(@Nullable Object str) {
 		return (str == null || "".equals(str));
@@ -136,6 +141,8 @@ public abstract class StringUtils {
 	 * @param str the {@code CharSequence} to check (may be {@code null})
 	 * @return {@code true} if the {@code CharSequence} is not {@code null},
 	 * its length is greater than 0, and it does not contain whitespace only
+	 * @see #hasText(String)
+	 * @see #hasLength(CharSequence)
 	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable CharSequence str) {
@@ -151,6 +158,8 @@ public abstract class StringUtils {
 	 * @return {@code true} if the {@code String} is not {@code null}, its
 	 * length is greater than 0, and it does not contain whitespace only
 	 * @see #hasText(CharSequence)
+	 * @see #hasLength(String)
+	 * @see Character#isWhitespace
 	 */
 	public static boolean hasText(@Nullable String str) {
 		return (str != null && !str.isEmpty() && containsText(str));
@@ -407,14 +416,14 @@ public abstract class StringUtils {
 		int pos = 0;  // our position in the old string
 		int patLen = oldPattern.length();
 		while (index >= 0) {
-			sb.append(inString.substring(pos, index));
+			sb.append(inString, pos, index);
 			sb.append(newPattern);
 			pos = index + patLen;
 			index = inString.indexOf(oldPattern, pos);
 		}
 
 		// append any characters to the right of a match
-		sb.append(inString.substring(pos));
+		sb.append(inString, pos, inString.length());
 		return sb.toString();
 	}
 
@@ -646,7 +655,7 @@ public abstract class StringUtils {
 		String prefix = "";
 		if (prefixIndex != -1) {
 			prefix = pathToUse.substring(0, prefixIndex + 1);
-			if (prefix.contains("/")) {
+			if (prefix.contains(FOLDER_SEPARATOR)) {
 				prefix = "";
 			}
 			else {
@@ -659,7 +668,7 @@ public abstract class StringUtils {
 		}
 
 		String[] pathArray = delimitedListToStringArray(pathToUse, FOLDER_SEPARATOR);
-		List<String> pathElements = new LinkedList<>();
+		LinkedList<String> pathElements = new LinkedList<>();
 		int tops = 0;
 
 		for (int i = pathArray.length - 1; i >= 0; i--) {
@@ -686,6 +695,10 @@ public abstract class StringUtils {
 		// Remaining top paths need to be retained.
 		for (int i = 0; i < tops; i++) {
 			pathElements.add(0, TOP_PATH);
+		}
+		// If nothing else left, at least explicitly point to current path.
+		if (pathElements.size() == 1 && "".equals(pathElements.getLast()) && !prefix.endsWith(FOLDER_SEPARATOR)) {
+			pathElements.add(0, CURRENT_PATH);
 		}
 
 		return prefix + collectionToDelimitedString(pathElements, FOLDER_SEPARATOR);
@@ -768,19 +781,25 @@ public abstract class StringUtils {
 	public static Locale parseLocale(String localeValue) {
 		String[] tokens = tokenizeLocaleSource(localeValue);
 		if (tokens.length == 1) {
-			return Locale.forLanguageTag(localeValue);
+			Locale resolved = Locale.forLanguageTag(localeValue);
+			if (resolved.getLanguage().length() > 0) {
+				return resolved;
+			}
 		}
 		return parseLocaleTokens(localeValue, tokens);
 	}
 
 	/**
 	 * Parse the given {@code String} representation into a {@link Locale}.
-	 * <p>This is the inverse operation of {@link Locale#toString Locale's toString}.
+	 * <p>For many parsing scenarios, this is an inverse operation of
+	 * {@link Locale#toString Locale's toString}, in a lenient sense.
+	 * This method does not aim for strict {@code Locale} design compliance;
+	 * it is rather specifically tailored for typical Spring parsing needs.
+	 * <p><b>Note: This delegate does not accept the BCP 47 language tag format.
+	 * Please use {@link #parseLocale} for lenient parsing of both formats.</b>
 	 * @param localeString the locale {@code String}: following {@code Locale's}
 	 * {@code toString()} format ("en", "en_UK", etc), also accepting spaces as
 	 * separators (as an alternative to underscores)
-	 * <p>Note: This variant does not accept the BCP 47 language tag format.
-	 * Please use {@link #parseLocale} for lenient parsing of both formats.
 	 * @return a corresponding {@code Locale} instance, or {@code null} if none
 	 * @throws IllegalArgumentException in case of an invalid locale specification
 	 */
@@ -811,6 +830,12 @@ public abstract class StringUtils {
 				variant = trimLeadingCharacter(variant, '_');
 			}
 		}
+
+		if (variant.isEmpty() && country.startsWith("#")) {
+			variant = country;
+			country = "";
+		}
+
 		return (language.length() > 0 ? new Locale(language, country, variant) : null);
 	}
 
@@ -856,6 +881,28 @@ public abstract class StringUtils {
 	//---------------------------------------------------------------------
 	// Convenience methods for working with String arrays
 	//---------------------------------------------------------------------
+
+	/**
+	 * Copy the given {@link Collection} into a {@code String} array.
+	 * <p>The {@code Collection} must contain {@code String} elements only.
+	 * @param collection the {@code Collection} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Collection<String> collection) {
+		return (collection != null ? collection.toArray(new String[0]) : new String[0]);
+	}
+
+	/**
+	 * Copy the given {@link Enumeration} into a {@code String} array.
+	 * <p>The {@code Enumeration} must contain {@code String} elements only.
+	 * @param enumeration the {@code Enumeration} to copy
+	 * (potentially {@code null} or empty)
+	 * @return the resulting {@code String} array
+	 */
+	public static String[] toStringArray(@Nullable Enumeration<String> enumeration) {
+		return (enumeration != null ? toStringArray(Collections.list(enumeration)) : new String[0]);
+	}
 
 	/**
 	 * Append the given {@code String} to the given {@code String} array,
@@ -932,9 +979,9 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Turn given source {@code String} array into sorted array.
-	 * @param array the source array
-	 * @return the sorted array (never {@code null})
+	 * Sort the given {@code String} array if necessary.
+	 * @param array the original array (potentially empty)
+	 * @return the array in sorted form (never {@code null})
 	 */
 	public static String[] sortStringArray(String[] array) {
 		if (ObjectUtils.isEmpty(array)) {
@@ -946,29 +993,9 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Copy the given {@code Collection} into a {@code String} array.
-	 * <p>The {@code Collection} must contain {@code String} elements only.
-	 * @param collection the {@code Collection} to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Collection<String> collection) {
-		return collection.toArray(new String[0]);
-	}
-
-	/**
-	 * Copy the given Enumeration into a {@code String} array.
-	 * The Enumeration must contain {@code String} elements only.
-	 * @param enumeration the Enumeration to copy
-	 * @return the {@code String} array
-	 */
-	public static String[] toStringArray(Enumeration<String> enumeration) {
-		return toStringArray(Collections.list(enumeration));
-	}
-
-	/**
 	 * Trim the elements of the given {@code String} array,
 	 * calling {@code String.trim()} on each of them.
-	 * @param array the original {@code String} array
+	 * @param array the original {@code String} array (potentially empty)
 	 * @return the resulting array (of the same size) with trimmed elements
 	 */
 	public static String[] trimArrayElements(@Nullable String[] array) {
@@ -987,7 +1014,7 @@ public abstract class StringUtils {
 	/**
 	 * Remove duplicate strings from the given array.
 	 * <p>As of 4.2, it preserves the original order, as it uses a {@link LinkedHashSet}.
-	 * @param array the {@code String} array
+	 * @param array the {@code String} array (potentially empty)
 	 * @return an array without duplicates, in natural sort order
 	 */
 	public static String[] removeDuplicateStrings(String[] array) {
@@ -995,18 +1022,15 @@ public abstract class StringUtils {
 			return array;
 		}
 
-		Set<String> set = new LinkedHashSet<>();
-		for (String element : array) {
-			set.add(element);
-		}
+		Set<String> set = new LinkedHashSet<>(Arrays.asList(array));
 		return toStringArray(set);
 	}
 
 	/**
 	 * Split a {@code String} at the first occurrence of the delimiter.
 	 * Does not include the delimiter in the result.
-	 * @param toSplit the string to split
-	 * @param delimiter to split the string up with
+	 * @param toSplit the string to split (potentially {@code null} or empty)
+	 * @param delimiter to split the string up with (potentially {@code null} or empty)
 	 * @return a two element array with index 0 being before the delimiter, and
 	 * index 1 being after the delimiter (neither element includes the delimiter);
 	 * or {@code null} if the delimiter wasn't found in the given input {@code String}
@@ -1085,7 +1109,7 @@ public abstract class StringUtils {
 	 * delimiter characters. Each of those characters can be used to separate
 	 * tokens. A delimiter is always a single character; for multi-character
 	 * delimiters, consider using {@link #delimitedListToStringArray}.
-	 * @param str the {@code String} to tokenize
+	 * @param str the {@code String} to tokenize (potentially {@code null} or empty)
 	 * @param delimiters the delimiter characters, assembled as a {@code String}
 	 * (each of the characters is individually considered as a delimiter)
 	 * @return an array of the tokens
@@ -1104,7 +1128,7 @@ public abstract class StringUtils {
 	 * delimiter characters. Each of those characters can be used to separate
 	 * tokens. A delimiter is always a single character; for multi-character
 	 * delimiters, consider using {@link #delimitedListToStringArray}.
-	 * @param str the {@code String} to tokenize
+	 * @param str the {@code String} to tokenize (potentially {@code null} or empty)
 	 * @param delimiters the delimiter characters, assembled as a {@code String}
 	 * (each of the characters is individually considered as a delimiter)
 	 * @param trimTokens trim the tokens via {@link String#trim()}
@@ -1144,7 +1168,7 @@ public abstract class StringUtils {
 	 * but it will still be considered as a single delimiter string, rather
 	 * than as bunch of potential delimiter characters, in contrast to
 	 * {@link #tokenizeToStringArray}.
-	 * @param str the input {@code String}
+	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @param delimiter the delimiter between elements (this is a single delimiter,
 	 * rather than a bunch individual delimiter characters)
 	 * @return an array of the tokens in the list
@@ -1161,7 +1185,7 @@ public abstract class StringUtils {
 	 * but it will still be considered as a single delimiter string, rather
 	 * than as bunch of potential delimiter characters, in contrast to
 	 * {@link #tokenizeToStringArray}.
-	 * @param str the input {@code String}
+	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @param delimiter the delimiter between elements (this is a single delimiter,
 	 * rather than a bunch individual delimiter characters)
 	 * @param charsToDelete a set of characters to delete; useful for deleting unwanted
@@ -1180,7 +1204,7 @@ public abstract class StringUtils {
 		}
 
 		List<String> result = new ArrayList<>();
-		if ("".equals(delimiter)) {
+		if (delimiter.isEmpty()) {
 			for (int i = 0; i < str.length(); i++) {
 				result.add(deleteAny(str.substring(i, i + 1), charsToDelete));
 			}
@@ -1203,7 +1227,7 @@ public abstract class StringUtils {
 	/**
 	 * Convert a comma delimited list (e.g., a row from a CSV file) into an
 	 * array of strings.
-	 * @param str the input {@code String}
+	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @return an array of strings, or the empty array in case of empty input
 	 */
 	public static String[] commaDelimitedListToStringArray(@Nullable String str) {
@@ -1214,23 +1238,19 @@ public abstract class StringUtils {
 	 * Convert a comma delimited list (e.g., a row from a CSV file) into a set.
 	 * <p>Note that this will suppress duplicates, and as of 4.2, the elements in
 	 * the returned set will preserve the original order in a {@link LinkedHashSet}.
-	 * @param str the input {@code String}
+	 * @param str the input {@code String} (potentially {@code null} or empty)
 	 * @return a set of {@code String} entries in the list
 	 * @see #removeDuplicateStrings(String[])
 	 */
 	public static Set<String> commaDelimitedListToSet(@Nullable String str) {
-		Set<String> set = new LinkedHashSet<>();
 		String[] tokens = commaDelimitedListToStringArray(str);
-		for (String token : tokens) {
-			set.add(token);
-		}
-		return set;
+		return new LinkedHashSet<>(Arrays.asList(tokens));
 	}
 
 	/**
 	 * Convert a {@link Collection} to a delimited {@code String} (e.g. CSV).
 	 * <p>Useful for {@code toString()} implementations.
-	 * @param coll the {@code Collection} to convert
+	 * @param coll the {@code Collection} to convert (potentially {@code null} or empty)
 	 * @param delim the delimiter to use (typically a ",")
 	 * @param prefix the {@code String} to start each element with
 	 * @param suffix the {@code String} to end each element with
@@ -1257,7 +1277,7 @@ public abstract class StringUtils {
 	/**
 	 * Convert a {@code Collection} into a delimited {@code String} (e.g. CSV).
 	 * <p>Useful for {@code toString()} implementations.
-	 * @param coll the {@code Collection} to convert
+	 * @param coll the {@code Collection} to convert (potentially {@code null} or empty)
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code String}
 	 */
@@ -1268,17 +1288,17 @@ public abstract class StringUtils {
 	/**
 	 * Convert a {@code Collection} into a delimited {@code String} (e.g., CSV).
 	 * <p>Useful for {@code toString()} implementations.
-	 * @param coll the {@code Collection} to convert
+	 * @param coll the {@code Collection} to convert (potentially {@code null} or empty)
 	 * @return the delimited {@code String}
 	 */
-	public static String collectionToCommaDelimitedString(Collection<?> coll) {
+	public static String collectionToCommaDelimitedString(@Nullable Collection<?> coll) {
 		return collectionToDelimitedString(coll, ",");
 	}
 
 	/**
 	 * Convert a {@code String} array into a delimited {@code String} (e.g. CSV).
 	 * <p>Useful for {@code toString()} implementations.
-	 * @param arr the array to display
+	 * @param arr the array to display (potentially {@code null} or empty)
 	 * @param delim the delimiter to use (typically a ",")
 	 * @return the delimited {@code String}
 	 */
@@ -1304,7 +1324,7 @@ public abstract class StringUtils {
 	 * Convert a {@code String} array into a comma delimited {@code String}
 	 * (i.e., CSV).
 	 * <p>Useful for {@code toString()} implementations.
-	 * @param arr the array to display
+	 * @param arr the array to display (potentially {@code null} or empty)
 	 * @return the delimited {@code String}
 	 */
 	public static String arrayToCommaDelimitedString(@Nullable Object[] arr) {

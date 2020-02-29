@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -345,7 +345,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertEquals("", uriVariables.get("params"));
 	}
 
-	@Test
+	@Test // SPR-10140, SPR-16867
 	public void handleMatchMatrixVariablesDecoding() {
 
 		MockHttpServletRequest request;
@@ -357,14 +357,14 @@ public class RequestMappingInfoHandlerMappingTests {
 		this.handlerMapping.setUrlPathHelper(urlPathHelper);
 
 		request = new MockHttpServletRequest();
-		handleMatch(request, "/path{filter}", "/path;mvar=a%2fb");
+		handleMatch(request, "/{cars}", "/cars;mvar=a%2Fb");
 
-		MultiValueMap<String, String> matrixVariables = getMatrixVariables(request, "filter");
+		MultiValueMap<String, String> matrixVariables = getMatrixVariables(request, "cars");
 		Map<String, String> uriVariables = getUriTemplateVariables(request);
 
 		assertNotNull(matrixVariables);
 		assertEquals(Collections.singletonList("a/b"), matrixVariables.get("mvar"));
-		assertEquals(";mvar=a/b", uriVariables.get("filter"));
+		assertEquals("cars", uriVariables.get("cars"));
 	}
 
 

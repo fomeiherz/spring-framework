@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,7 +38,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * <p>The created {@link Map} contains all request parameter name/value pairs.
  * If the method parameter type is {@link MultiValueMap} instead, the created
- * map contains all request parameters and all there values for cases where
+ * map contains all request parameters and all their values for cases where
  * request parameters have multiple values.
  *
  * @author Arjen Poutsma
@@ -59,10 +59,8 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 	public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer,
 			NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
 
-		Class<?> paramType = parameter.getParameterType();
-
 		Map<String, String[]> parameterMap = webRequest.getParameterMap();
-		if (MultiValueMap.class.isAssignableFrom(paramType)) {
+		if (MultiValueMap.class.isAssignableFrom(parameter.getParameterType())) {
 			MultiValueMap<String, String> result = new LinkedMultiValueMap<>(parameterMap.size());
 			parameterMap.forEach((key, values) -> {
 				for (String value : values) {
@@ -81,4 +79,5 @@ public class RequestParamMapMethodArgumentResolver implements HandlerMethodArgum
 			return result;
 		}
 	}
+
 }

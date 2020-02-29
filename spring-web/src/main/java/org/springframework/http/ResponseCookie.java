@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -99,7 +99,7 @@ public final class ResponseCookie extends HttpCookie {
 
 	/**
 	 * Return {@code true} if the cookie has the "HttpOnly" attribute.
-	 * @see <a href="http://www.owasp.org/index.php/HTTPOnly">http://www.owasp.org/index.php/HTTPOnly</a>
+	 * @see <a href="https://www.owasp.org/index.php/HTTPOnly">https://www.owasp.org/index.php/HTTPOnly</a>
 	 */
 	public boolean isHttpOnly() {
 		return this.httpOnly;
@@ -139,12 +139,10 @@ public final class ResponseCookie extends HttpCookie {
 			sb.append("; Domain=").append(this.domain);
 		}
 		if (!this.maxAge.isNegative()) {
-			sb.append("; Max-Age=").append(this.maxAge);
+			sb.append("; Max-Age=").append(this.maxAge.getSeconds());
 			sb.append("; Expires=");
-			HttpHeaders headers = new HttpHeaders();
-			long seconds = this.maxAge.getSeconds();
-			headers.setExpires(seconds > 0 ? System.currentTimeMillis() + seconds : 0);
-			sb.append(headers.getFirst(HttpHeaders.EXPIRES));
+			long millis = this.maxAge.getSeconds() > 0 ? System.currentTimeMillis() + this.maxAge.toMillis() : 0;
+			sb.append(HttpHeaders.formatDate(millis));
 		}
 
 		if (this.secure) {
@@ -241,7 +239,7 @@ public final class ResponseCookie extends HttpCookie {
 		ResponseCookieBuilder maxAge(Duration maxAge);
 
 		/**
-		 * Set the cookie "Max-Age" attribute in seconds.
+		 * Variant of {@link #maxAge(Duration)} accepting a value in seconds.
 		 */
 		ResponseCookieBuilder maxAge(long maxAgeSeconds);
 
@@ -262,7 +260,7 @@ public final class ResponseCookie extends HttpCookie {
 
 		/**
 		 * Add the "HttpOnly" attribute to the cookie.
-		 * @see <a href="http://www.owasp.org/index.php/HTTPOnly">http://www.owasp.org/index.php/HTTPOnly</a>
+		 * @see <a href="https://www.owasp.org/index.php/HTTPOnly">https://www.owasp.org/index.php/HTTPOnly</a>
 		 */
 		ResponseCookieBuilder httpOnly(boolean httpOnly);
 

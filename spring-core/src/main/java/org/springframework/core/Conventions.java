@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -40,8 +40,6 @@ public abstract class Conventions {
 	 * Suffix added to names when using arrays.
 	 */
 	private static final String PLURAL_SUFFIX = "List";
-
-	private static final ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 
 
 	/**
@@ -116,7 +114,7 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = parameter.getParameterType();
-
+			ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {
@@ -205,6 +203,7 @@ public abstract class Conventions {
 		}
 		else {
 			valueClass = resolvedType;
+			ReactiveAdapterRegistry reactiveAdapterRegistry = ReactiveAdapterRegistry.getSharedInstance();
 			if (reactiveAdapterRegistry.hasAdapters()) {
 				ReactiveAdapter adapter = reactiveAdapterRegistry.getAdapter(valueClass);
 				if (adapter != null && !adapter.getDescriptor().isNoValue()) {

@@ -20,12 +20,12 @@ helpful for independent work on UI templates, e.g. by designer, without the need
 running server. If you're looking to replace JSPs, Thymeleaf offers one of the most
 extensive set of features that will make such a transition easier. Thymeleaf is actively
 developed and maintained. For a more complete introduction see the
-http://www.thymeleaf.org/[Thymeleaf] project home page.
+https://www.thymeleaf.org/[Thymeleaf] project home page.
 
-The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project. The
-configuration involves a few bean declarations such as
+The Thymeleaf integration with Spring MVC is managed by the Thymeleaf project.
+The configuration involves a few bean declarations such as
 `ServletContextTemplateResolver`, `SpringTemplateEngine`, and `ThymeleafViewResolver`.
-See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
+See https://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more details.
 
 
 
@@ -34,7 +34,7 @@ See http://www.thymeleaf.org/documentation.html[Thymeleaf+Spring] for more detai
 == FreeMarker
 [.small]#<<web-reactive.adoc#webflux-view-freemarker,Same in Spring WebFlux>>#
 
-http://www.freemarker.org[Apache FreeMarker] is a template engine for generating any
+https://freemarker.apache.org/[Apache FreeMarker] is a template engine for generating any
 kind of text output from HTML to email, and others. The Spring Framework has a built-in
 integration for using Spring MVC with FreeMarker templates.
 
@@ -273,21 +273,21 @@ The parameters to any of the above macros have consistent meanings:
   field. The keys to the map represent the values that will be POSTed back from the form
   and bound to the command object. Map objects stored against the keys are the labels
   displayed on the form to the user and may be different from the corresponding values
-  posted back by the form. Usually such a map is supplied as reference data by the
-  controller. Any Map implementation can be used depending on required behavior. For
-  strictly sorted maps, a `SortedMap` such as a `TreeMap` with a suitable Comparator may
-  be used and for arbitrary Maps that should return values in insertion order, use a
-  `LinkedHashMap` or a `LinkedMap` from commons-collections.
-* separator: where multiple options are available as discreet elements (radio buttons or
-  checkboxes), the sequence of characters used to separate each one in the list (ie
-  "<br>").
-* attributes: an additional string of arbitrary tags or text to be included within the
-  HTML tag itself. This string is echoed literally by the macro. For example, in a
-  textarea field you may supply attributes as 'rows="5" cols="60"' or you could pass
-  style information such as 'style="border:1px solid silver"'.
-* classOrStyle: for the showErrors macro, the name of the CSS class that the span tag
-  wrapping each error will use. If no information is supplied (or the value is empty)
-  then the errors will be wrapped in <b></b> tags.
+  posted back by the form. Usually, such a map is supplied as reference data by the
+  controller. You can use any `Map` implementation, depending on required behavior.
+  For strictly sorted maps, you can use a `SortedMap` (such as a `TreeMap`) with a
+  suitable `Comparator` and, for arbitrary Maps that should return values in insertion
+  order, use a `LinkedHashMap` or a `LinkedMap` from `commons-collections`.
+* `separator`: Where multiple options are available as discreet elements (radio buttons
+  or checkboxes), the sequence of characters used to separate each one in the list
+  (such as `<br>`).
+* `attributes`: An additional string of arbitrary tags or text to be included within
+  the HTML tag itself. This string is echoed literally by the macro. For example, in a
+  `textarea` field, you may supply attributes (such as 'rows="5" cols="60"'), or you
+  could pass style information such as 'style="border:1px solid silver"'.
+* `classOrStyle`: For the `showErrors` macro, the name of the CSS class that the `span`
+  element that wraps each error uses. If no information is supplied (or the value is
+  empty), the errors are wrapped in `<b></b>` tags.
 
 Examples of the macros are outlined below some in FTL and some in VTL. Where usage
 differences exist between the two languages, they are explained in the notes.
@@ -461,7 +461,7 @@ integration for using Spring MVC with Groovy Markup.
 
 [TIP]
 ====
-The Groovy Markup Tempalte engine requires Groovy 2.3.1+.
+The Groovy Markup Template engine requires Groovy 2.3.1+.
 ====
 
 
@@ -545,13 +545,13 @@ https://www.jcp.org/en/jsr/detail?id=223[JSR-223] Java scripting engine. Below i
 of templating libraries we've tested on different script engines:
 
 [horizontal]
-http://handlebarsjs.com/[Handlebars] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-https://mustache.github.io/[Mustache] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-http://facebook.github.io/react/[React] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-http://www.embeddedjs.com/[EJS] :: http://openjdk.java.net/projects/nashorn/[Nashorn]
-http://www.stuartellis.eu/articles/erb/[ERB] :: http://jruby.org[JRuby]
-https://docs.python.org/2/library/string.html#template-strings[String templates] :: http://www.jython.org/[Jython]
-https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] :: http://kotlinlang.org/[Kotlin]
+https://handlebarsjs.com/[Handlebars] :: https://openjdk.java.net/projects/nashorn/[Nashorn]
+https://mustache.github.io/[Mustache] :: https://openjdk.java.net/projects/nashorn/[Nashorn]
+https://facebook.github.io/react/[React] :: https://openjdk.java.net/projects/nashorn/[Nashorn]
+https://www.embeddedjs.com/[EJS] :: https://openjdk.java.net/projects/nashorn/[Nashorn]
+https://www.stuartellis.name/articles/erb/[ERB] :: https://www.jruby.org[JRuby]
+https://docs.python.org/2/library/string.html#template-strings[String templates] :: https://www.jython.org/[Jython]
+https://github.com/sdeleuze/kotlin-script-templating[Kotlin Script templating] :: https://kotlinlang.org/[Kotlin]
 
 [TIP]
 ====
@@ -567,17 +567,17 @@ The basic rule for integrating any other script engine is that it must implement
 
 You need to have the script engine on your classpath:
 
-* http://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
+* https://openjdk.java.net/projects/nashorn/[Nashorn] JavaScript engine is provided with
 Java 8+. Using the latest update release available is highly recommended.
-* http://jruby.org[JRuby] should be added as a dependency for Ruby support.
-* http://www.jython.org[Jython] should be added as a dependency for Python support.
+* https://www.jruby.org[JRuby] should be added as a dependency for Ruby support.
+* https://www.jython.org[Jython] should be added as a dependency for Python support.
 * `org.jetbrains.kotlin:kotlin-script-util` dependency and a `META-INF/services/javax.script.ScriptEngineFactory`
  file containing a `org.jetbrains.kotlin.script.jsr223.KotlinJsr223JvmLocalScriptEngineFactory`
  line should be added for Kotlin script support, see
  https://github.com/sdeleuze/kotlin-script-templating[this example] for more details.
 
 You need to have the script templating library. One way to do that for Javascript is
-through http://www.webjars.org/[WebJars].
+through https://www.webjars.org/[WebJars].
 
 
 
@@ -673,9 +673,9 @@ The render function is called with the following parameters:
 `Mustache.render()` is natively compatible with this signature, so you can call it directly.
 
 If your templating technology requires some customization, you may provide a script that
-implements a custom render function. For example, http://handlebarsjs.com[Handlerbars]
+implements a custom render function. For example, https://handlebarsjs.com[Handlerbars]
 needs to compile templates before using them, and requires a
-http://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
+https://en.wikipedia.org/wiki/Polyfill[polyfill] in order to emulate some
 browser facilities not available in the server-side script engine.
 
 [source,java,indent=0]
@@ -750,12 +750,12 @@ The Spring Framework has a built-in integration for using Spring MVC with JSP an
 [[mvc-view-jsp-resolver]]
 === View resolvers
 
-When developing with JSPs you can declare a `InternalResourceViewResolver` or a
+When developing with JSPs, you can declare a `InternalResourceViewResolver` or a
 `ResourceBundleViewResolver` bean.
 
 `ResourceBundleViewResolver` relies on a properties file to define the view names
-mapped to a class and a URL. With a `ResourceBundleViewResolver` you
-can mix different types of views using only one resolver. Here is an example:
+mapped to a class and a URL. With a `ResourceBundleViewResolver`, you can mix
+different types of views by using only one resolver, as the following example shows:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -765,7 +765,7 @@ can mix different types of views using only one resolver. Here is an example:
 		<property name="basename" value="views"/>
 	</bean>
 
-	# And a sample properties file is uses (views.properties in WEB-INF/classes):
+	# And a sample properties file is used (views.properties in WEB-INF/classes):
 	welcome.(class)=org.springframework.web.servlet.view.JstlView
 	welcome.url=/WEB-INF/jsp/welcome.jsp
 
@@ -773,9 +773,9 @@ can mix different types of views using only one resolver. Here is an example:
 	productList.url=/WEB-INF/jsp/productlist.jsp
 ----
 
-`InternalResourceBundleViewResolver` can also be used for JSPs. As a best practice, we
-strongly encourage placing your JSP files in a directory under the `'WEB-INF'`
-directory so there can be no direct access by clients.
+`InternalResourceViewResolver` can also be used for JSPs. As a best practice, we strongly
+encourage placing your JSP files in a directory under the `'WEB-INF'` directory so there
+can be no direct access by clients.
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -792,8 +792,8 @@ directory so there can be no direct access by clients.
 [[mvc-view-jsp-jstl]]
 === JSPs versus JSTL
 
-When using the Java Standard Tag Library you must use a special view class, the
-`JstlView`, as JSTL needs some preparation before things such as the I18N features will
+When using the JSP Standard Tag Library (JSTL) you must use a special view class, the
+`JstlView`, as JSTL needs some preparation before things such as the I18N features can
 work.
 
 
@@ -941,9 +941,8 @@ The preceding JSP assumes that the variable name of the form backing object is
 ==== The input tag
 
 This tag renders an HTML 'input' tag using the bound value and type='text' by default.
-For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. Starting with Spring
-3.1 you can use other types such HTML5-specific types like 'email', 'tel', 'date', and
-others.
+For an example of this tag, see <<mvc-view-jsp-formtaglib-formtag>>. You may also use
+HTML5-specific types like 'email', 'tel', 'date', and others.
 
 
 [[mvc-view-jsp-formtaglib-checkboxtag]]
@@ -1505,7 +1504,7 @@ or see the tag library description.
 A key principle of REST is the use of the Uniform Interface. This means that all
 resources (URLs) can be manipulated using the same four HTTP methods: GET, PUT, POST,
 and DELETE. For each method, the HTTP specification defines the exact semantics. For
-instance, a GET should always be a safe operation, meaning that is has no side effects,
+instance, a GET should always be a safe operation, meaning that it has no side effects,
 and a PUT or DELETE should be idempotent, meaning that you can repeat these operations
 over and over again, but the end result should be the same. While HTTP defines these
 four methods, HTML only supports two: GET and POST. Fortunately, there are two possible
@@ -1517,9 +1516,8 @@ web framework (not just Spring MVC). Simply add this filter to your web.xml, and
 with a hidden _method parameter will be converted into the corresponding HTTP method
 request.
 
-To support HTTP method conversion the Spring MVC form tag was updated to support setting
-the HTTP method. For example, the following snippet taken from the updated Petclinic
-sample
+To support HTTP method conversion, the Spring MVC form tag was updated to support setting
+the HTTP method. For example, the following snippet comes from the Pet Clinic sample:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1529,9 +1527,9 @@ sample
 	</form:form>
 ----
 
-This will actually perform an HTTP POST, with the 'real' DELETE method hidden behind a
-request parameter, to be picked up by the `HiddenHttpMethodFilter`, as defined in
-web.xml:
+The preceding example performs an HTTP POST, with the 'real' DELETE method hidden behind
+a request parameter. It is picked up by the `HiddenHttpMethodFilter`, which is defined in
+web.xml, as the following example shows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1563,12 +1561,12 @@ The corresponding `@Controller` method is shown below:
 [[mvc-view-jsp-formtaglib-html5]]
 ==== HTML5 tags
 
-Starting with Spring 3, the Spring form tag library allows entering dynamic attributes,
-which means you can enter any HTML5 specific attributes.
+The Spring form tag library allows entering dynamic attributes, which means you can
+enter any HTML5 specific attributes.
 
-In Spring 3.1, the form input tag supports entering a type attribute other than 'text'.
-This is intended to allow rendering new HTML5 specific input types such as 'email',
-'date', 'range', and others. Note that entering type='text' is not required since 'text'
+The form input tag supports entering a type attribute other than 'text'. This is
+intended to allow rendering new HTML5 specific input types such as 'email', 'date',
+'range', and others. Note that entering type='text' is not required since 'text'
 is the default type.
 
 
@@ -1592,7 +1590,7 @@ This section focuses on Spring's support for Tiles v3 in the
 === Dependencies
 
 To be able to use Tiles, you have to add a dependency on Tiles version 3.0.1 or higher
-and http://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
+and https://tiles.apache.org/framework/dependency-management.html[its transitive dependencies]
 to your project.
 
 
@@ -1602,7 +1600,7 @@ to your project.
 
 To be able to use Tiles, you have to configure it using files containing definitions
 (for basic information on definitions and other Tiles concepts, please have a look at
-http://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
+https://tiles.apache.org[]). In Spring this is done using the `TilesConfigurer`. Have a
 look at the following piece of example ApplicationContext configuration:
 
 [source,xml,indent=0]
@@ -1715,17 +1713,18 @@ implementations. Check out the Tiles documentation for details on how to use
 
 Specify `SimpleSpringPreparerFactory` to autowire ViewPreparer instances based on
 specified preparer classes, applying Spring's container callbacks as well as applying
-configured Spring BeanPostProcessors. If Spring's context-wide annotation-config has
-been activated, annotations in ViewPreparer classes will be automatically detected and
-applied. Note that this expects preparer __classes__ in the Tiles definition files, just
-like the default `PreparerFactory` does.
+configured Spring BeanPostProcessors. If Spring's context-wide annotation configuration has
+been activated, annotations in `ViewPreparer` classes are automatically detected and
+applied. Note that this expects preparer classes in the Tiles definition files, as
+the default `PreparerFactory` does.
 
 Specify `SpringBeanPreparerFactory` to operate on specified preparer __names__ instead
 of classes, obtaining the corresponding Spring bean from the DispatcherServlet's
 application context. The full bean creation process will be in the control of the Spring
 application context in this case, allowing for the use of explicit dependency injection
-configuration, scoped beans etc. Note that you need to define one Spring bean definition
-per preparer name (as used in your Tiles definitions).
+configuration, scoped beans, and so on. Note that you need to define one Spring bean definition
+for each preparer name (as used in your Tiles definitions). The following example shows
+how to define a `SpringBeanPreparerFactory` property on a `TilesConfigurer` bean:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1788,7 +1787,7 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as shown belo
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class SampleContentAtomView extends AbstractRssFeedView {
+	public class SampleContentRssView extends AbstractRssFeedView {
 
 		@Override
 		protected void buildFeedMetadata(Map<String, Object> model,
@@ -1801,7 +1800,6 @@ Similar requirements apply for implementing `AbstractRssFeedView`, as shown belo
 				HttpServletRequest request, HttpServletResponse response) throws Exception {
 			// implementation omitted
 		}
-
 	}
 ----
 
@@ -1822,7 +1820,7 @@ https://spring.io/blog/2009/03/16/adding-an-atom-view-to-an-application-using-sp
 
 
 [[mvc-view-document-intro]]
-=== Introduction
+=== Introduction to document views
 
 Returning an HTML page isn't always the best way for the user to view the model output,
 and Spring makes it simple to generate a PDF document or an Excel spreadsheet
@@ -1830,179 +1828,55 @@ dynamically from the model data. The document is the view and will be streamed f
 server with the correct content type to (hopefully) enable the client PC to run their
 spreadsheet or PDF viewer application in response.
 
-In order to use Excel views, you need to add the Apache POI library to your classpath,
-and for PDF generation preferably the OpenPDF library.
+In order to use Excel views, you need to add the Apache POI library to your classpath.
+For PDF generation, you need to add (preferably) the OpenPDF library.
 
-[NOTE]
-====
-Use the latest versions of the underlying document generation libraries if possible.
-In particular, we strongly recommend OpenPDF (e.g. OpenPDF 1.0.5) instead of the
-outdated original iText 2.1.7 since it is actively maintained and fixes an important
-vulnerability for untrusted PDF content.
-====
+NOTE: You should use the latest versions of the underlying document-generation libraries,
+if possible. In particular, we strongly recommend OpenPDF (for example, OpenPDF 1.0.5)
+instead of the outdated original iText 2.1.7, since OpenPDF is actively maintained and
+fixes an important vulnerability for untrusted PDF content.
 
 
 
-[[mvc-view-document-config]]
-=== Configuration
-
-Document based views are handled in an almost identical fashion to XSLT views, and the
-following sections build upon the previous one by demonstrating how the same controller
-used in the XSLT example is invoked to render the same model as both a PDF document and
-an Excel spreadsheet (which can also be viewed or manipulated in Open Office).
-
-
-
-[[mvc-view-document-configviews]]
-=== View definition
-
-First, let's amend the views.properties file (or xml equivalent) and add a simple view
-definition for both document types. The entire file now looks like this with the XSLT
-view shown from earlier:
-
-[literal]
-[subs="verbatim,quotes"]
-----
-home.(class)=xslt.HomePage
-home.stylesheetLocation=/WEB-INF/xsl/home.xslt
-home.root=words
-
-xl.(class)=excel.HomePage
-
-pdf.(class)=pdf.HomePage
-----
-
-__If you want to start with a template spreadsheet or a fillable PDF form to add your
-model data to, specify the location as the 'url' property in the view definition__
-
-
-
-[[mvc-view-document-configcontroller]]
-=== Controller
-
-The controller code we'll use remains exactly the same from the XSLT example earlier
-other than to change the name of the view to use. Of course, you could be clever and
-have this selected based on a URL parameter or some other logic - proof that Spring
-really is very good at decoupling the views from the controllers!
-
-
-
-[[mvc-view-document-configsubclasses]]
-=== Excel views
-
-Exactly as we did for the XSLT example, we'll subclass suitable abstract classes in
-order to implement custom behavior in generating our output documents. For Excel, this
-involves writing a subclass of
-`org.springframework.web.servlet.view.document.AbstractExcelView` (for Excel files
-generated by POI) or `org.springframework.web.servlet.view.document.AbstractJExcelView`
-(for JExcelApi-generated Excel files) and implementing the `buildExcelDocument()` method.
-
-Here's the complete listing for our POI Excel view which displays the word list from the
-model map in consecutive rows of the first column of a new spreadsheet:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	package excel;
-
-	// imports omitted for brevity
-
-	public class HomePage extends AbstractExcelView {
-
-		protected void buildExcelDocument(Map model, HSSFWorkbook wb, HttpServletRequest req,
-				HttpServletResponse resp) throws Exception {
-
-			HSSFSheet sheet;
-			HSSFRow sheetRow;
-			HSSFCell cell;
-
-			// Go to the first sheet
-			// getSheetAt: only if wb is created from an existing document
-			// sheet = wb.getSheetAt(0);
-			sheet = wb.createSheet("Spring");
-			sheet.setDefaultColumnWidth((short) 12);
-
-			// write a text at A1
-			cell = getCell(sheet, 0, 0);
-			setText(cell, "Spring-Excel test");
-
-			List words = (List) model.get("wordList");
-			for (int i=0; i < words.size(); i++) {
-				cell = getCell(sheet, 2+i, 0);
-				setText(cell, (String) words.get(i));
-			}
-		}
-
-	}
-----
-
-And the following is a view generating the same Excel file, now using JExcelApi:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	package excel;
-
-	// imports omitted for brevity
-
-	public class HomePage extends AbstractJExcelView {
-
-		protected void buildExcelDocument(Map model, WritableWorkbook wb,
-				HttpServletRequest request, HttpServletResponse response) throws Exception {
-
-			WritableSheet sheet = wb.createSheet("Spring", 0);
-
-			sheet.addCell(new Label(0, 0, "Spring-Excel test"));
-
-			List words = (List) model.get("wordList");
-			for (int i = 0; i < words.size(); i++) {
-				sheet.addCell(new Label(2+i, 0, (String) words.get(i)));
-			}
-		}
-	}
-----
-
-Note the differences between the APIs. We've found that the JExcelApi is somewhat more
-intuitive, and furthermore, JExcelApi has slightly better image-handling capabilities.
-There have been memory problems with large Excel files when using JExcelApi however.
-
-If you now amend the controller such that it returns `xl` as the name of the view (
-`return new ModelAndView("xl", map);`) and run your application again, you should find
-that the Excel spreadsheet is created and downloaded automatically when you request the
-same page as before.
-
-
-
-[[mvc-view-document-configsubclasspdf]]
+[[mvc-view-document-pdf]]
 === PDF views
 
-The PDF version of the word list is even simpler. This time, the class extends
-`org.springframework.web.servlet.view.document.AbstractPdfView` and implements the
+A simple PDF view for a word list could extend
+`org.springframework.web.servlet.view.document.AbstractPdfView` and implement the
 `buildPdfDocument()` method as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	package pdf;
+	public class PdfWordList extends AbstractPdfView {
 
-	// imports omitted for brevity
+		protected void buildPdfDocument(Map<String, Object> model, Document doc, PdfWriter writer,
+				HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-	public class PDFPage extends AbstractPdfView {
-
-		protected void buildPdfDocument(Map model, Document doc, PdfWriter writer,
-			HttpServletRequest req, HttpServletResponse resp) throws Exception {
-			List words = (List) model.get("wordList");
-			for (int i=0; i<words.size(); i++) {
-				doc.add( new Paragraph((String) words.get(i)));
+			List<String> words = (List<String>) model.get("wordList");
+			for (String word : words) {
+				doc.add(new Paragraph(word));
 			}
 		}
-
 	}
 ----
 
-Once again, amend the controller to return the `pdf` view with `return new
-ModelAndView("pdf", map);`, and reload the URL in your application. This time a PDF
-document should appear listing each of the words in the model map.
+A controller can return such a view either from an external view definition
+(referencing it by name) or as a `View` instance from the handler method.
+
+
+
+[[mvc-view-document-excel]]
+=== Excel views
+
+Since Spring Framework 4.2,
+`org.springframework.web.servlet.view.document.AbstractXlsView` is provided as a base
+class for Excel views. It is based on Apache POI, with specialized subclasses (`AbstractXlsxView`
+and `AbstractXlsxStreamingView`) that supersede the outdated `AbstractExcelView` class.
+
+The programming model is similar to `AbstractPdfView`, with `buildExcelDocument()`
+as the central template method and controllers being able to return such a view from
+an external definition (by name) or as a `View` instance from the handler method.
 
 
 
@@ -2014,37 +1888,38 @@ document should appear listing each of the words in the model map.
 
 
 [[mvc-view-json-mapping]]
-=== JSON
+=== Jackson-based JSON views
 [.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
 
 The `MappingJackson2JsonView` uses the Jackson library's `ObjectMapper` to render the response
 content as JSON. By default, the entire contents of the model map (with the exception of
-framework-specific classes) will be encoded as JSON. For cases where the contents of the
-map need to be filtered, users may specify a specific set of model attributes to encode
-via the `RenderedAttributes` property. The `extractValueFromSingleKeyModel` property may
-also be used to have the value in single-key models extracted and serialized directly
-rather than as a map of model attributes.
+framework-specific classes) are encoded as JSON. For cases where the contents of the
+map need to be filtered, you can specify a specific set of model attributes to encode
+by using the `modelKeys` property. You can also use the `extractValueFromSingleKeyModel`
+property to have the value in single-key models extracted and serialized directly rather
+than as a map of model attributes.
 
 JSON mapping can be customized as needed through the use of Jackson's provided
 annotations. When further control is needed, a custom `ObjectMapper` can be injected
 through the `ObjectMapper` property for cases where custom JSON
 serializers/deserializers need to be provided for specific types.
 
-http://en.wikipedia.org/wiki/JSONP[JSONP] is supported and automatically enabled when
-the request has a query parameter named `jsonp` or `callback`. The JSONP query parameter
-name(s) could be customized through the `jsonpParameterNames` property.
+As of Spring Framework 5.0.7, https://en.wikipedia.org/wiki/JSONP[JSONP] support is
+deprecated and requires to customize the JSONP query parameter
+name(s) through the `jsonpParameterNames` property. This support will be removed as of
+Spring Framework 5.1, <<mvc-cors,CORS>> should be used instead.
 
 
 
 [[mvc-view-xml-mapping]]
-=== XML
+=== Jackson-based XML views
 [.small]#<<web-reactive.adoc#webflux-view-httpmessagewriter,Same in Spring WebFlux>>#
 
-The `MappingJackson2XmlView` uses the
-https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
-to render the response content as XML. If the model contains multiples entries, the
-object to be serialized should be set explicitly using the `modelKey` bean property.
-If the model contains a single entry, it will be serialized automatically.
+`MappingJackson2XmlView` uses the
+https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension's] `XmlMapper`
+to render the response content as XML. If the model contains multiple entries, you should
+explicitly set the object to be serialized by using the `modelKey` bean property. If the
+model contains a single entry, it is serialized automatically.
 
 XML mapping can be customized as needed through the use of JAXB or Jackson's provided
 annotations. When further control is needed, a custom `XmlMapper` can be injected
@@ -2055,21 +1930,20 @@ serializers/deserializers need to be provided for specific types.
 
 
 [[mvc-view-xml-marshalling]]
-== XML
+== XML marshalling
 
-The `MarshallingView` uses an XML `Marshaller` defined in the `org.springframework.oxm`
-package to render the response content as XML. The object to be marshalled can be set
-explicitly using ``MarhsallingView``'s `modelKey` bean property. Alternatively, the view
-will iterate over all model properties and marshal the first type that is supported
+The `MarshallingView` uses an XML `Marshaller` (defined in the `org.springframework.oxm`
+package) to render the response content as XML. You can explicitly set the object to be
+marshalled by using a `MarshallingView` instance's `modelKey` bean property. Alternatively,
+the view iterates over all model properties and marshals the first type that is supported
 by the `Marshaller`. For more information on the functionality in the
-`org.springframework.oxm` package refer to the chapter <<oxm,Marshalling XML using O/X
-Mappers>>.
+`org.springframework.oxm` package, see <<data-access.adoc#oxm,Marshalling XML using O/X Mappers>>.
 
 
 
 
 [[mvc-view-xslt]]
-== XSLT
+== XSLT views
 
 XSLT is a transformation language for XML and is popular as a view technology within web
 applications. XSLT can be a good choice as a view technology if your application
@@ -2088,9 +1962,8 @@ document ready for transformation.
 [[mvc-view-xslt-beandefs]]
 === Beans
 
-Configuration is standard for a simple Spring application.
-The MVC configuration has to define a `XsltViewResolver` bean and
-regular MVC annotation configuration.
+Configuration is standard for a simple Spring web application: The MVC configuration
+has to define an `XsltViewResolver` bean and regular MVC annotation configuration.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2107,7 +1980,6 @@ public class WebConfig implements WebMvcConfigurer {
 		viewResolver.setSuffix(".xslt");
 		return viewResolver;
 	}
-
 }
 ----
 
@@ -2119,7 +1991,7 @@ And we need a Controller that encapsulates our word generation logic.
 === Controller
 
 The controller logic is encapsulated in a `@Controller` class, with the
-handler method being defined like so...
+handler method being defined as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2129,7 +2001,6 @@ handler method being defined like so...
 
 		@RequestMapping("/")
 		public String home(Model model) throws Exception {
-
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 			Element root = document.createElement("wordList");
 
@@ -2144,7 +2015,6 @@ handler method being defined like so...
 			model.addAttribute("wordList", root);
 			return "home";
 		}
-
 	}
 ----
 

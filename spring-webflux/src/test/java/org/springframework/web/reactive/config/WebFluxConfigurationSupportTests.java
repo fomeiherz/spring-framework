@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,7 @@ import org.springframework.web.bind.support.WebExchangeDataBinder;
 import org.springframework.web.reactive.accept.RequestedContentTypeResolver;
 import org.springframework.web.reactive.handler.AbstractUrlHandlerMapping;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.resource.ResourceUrlProvider;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
@@ -265,6 +266,15 @@ public class WebFluxConfigurationSupportTests {
 		SimpleUrlHandlerMapping urlHandlerMapping = (SimpleUrlHandlerMapping) handlerMapping;
 		WebHandler webHandler = (WebHandler) urlHandlerMapping.getUrlMap().get("/images/**");
 		assertNotNull(webHandler);
+	}
+
+	@Test
+	public void resourceUrlProvider() throws Exception {
+		ApplicationContext context = loadConfig(WebFluxConfig.class);
+
+		String name = "resourceUrlProvider";
+		ResourceUrlProvider resourceUrlProvider = context.getBean(name, ResourceUrlProvider.class);
+		assertNotNull(resourceUrlProvider);
 	}
 
 

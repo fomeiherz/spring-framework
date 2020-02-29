@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -233,7 +233,7 @@ public abstract class ScriptUtils {
 								"Missing block comment end delimiter: " + blockCommentEndDelimiter, resource);
 					}
 				}
-				else if (c == ' ' || c == '\n' || c == '\t') {
+				else if (c == ' ' || c == '\r' || c == '\n' || c == '\t') {
 					// Avoid multiple adjacent whitespace characters
 					if (sb.length() > 0 && sb.charAt(sb.length() - 1) != ' ') {
 						c = ' ';
@@ -339,7 +339,7 @@ public abstract class ScriptUtils {
 	/**
 	 * Does the provided SQL script contain the specified delimiter?
 	 * @param script the SQL script
-	 * @param delim String delimiting each statement - typically a ';' character
+	 * @param delim the string delimiting each statement - typically a ';' character
 	 */
 	public static boolean containsSqlScriptDelimiters(String script, String delim) {
 		boolean inLiteral = false;
@@ -460,7 +460,7 @@ public abstract class ScriptUtils {
 				separator = FALLBACK_STATEMENT_SEPARATOR;
 			}
 
-			List<String> statements = new LinkedList<>();
+			List<String> statements = new ArrayList<>();
 			splitSqlScript(resource, script, separator, commentPrefix, blockCommentStartDelimiter,
 					blockCommentEndDelimiter, statements);
 

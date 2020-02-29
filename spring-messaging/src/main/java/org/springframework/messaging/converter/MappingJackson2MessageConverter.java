@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -181,8 +181,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return;
 		}
 
+		// Do not log warning for serializer not found (note: different message wording on Jackson 2.9)
 		boolean debugLevel = (cause instanceof JsonMappingException &&
-				cause.getMessage().startsWith("Can not find"));
+				(cause.getMessage().startsWith("Can not find") || cause.getMessage().startsWith("Cannot find")));
 
 		if (debugLevel ? logger.isDebugEnabled() : logger.isWarnEnabled()) {
 			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +

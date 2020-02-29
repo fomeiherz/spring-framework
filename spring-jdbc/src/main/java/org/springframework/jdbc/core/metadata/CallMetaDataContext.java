@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -520,7 +520,7 @@ public class CallMetaDataContext {
 										matchedParameters.put(parameterName,
 												SqlParameterSourceUtils.getTypedValue(parameterSource, sourceName));
 									}
-									else {
+									else if (logger.isWarnEnabled()) {
 										logger.warn("Unable to locate the corresponding parameter value for '" +
 												parameterName + "' within the parameter values provided: " +
 												caseInsensitiveParameterNames.values());
@@ -587,7 +587,7 @@ public class CallMetaDataContext {
 			for (String parameterName : callParameterNames.keySet()) {
 				String parameterNameToMatch = provider.parameterNameToUse(parameterName);
 				String callParameterName = callParameterNames.get(lowerCase(parameterNameToMatch));
-				if (!matchedParameters.containsKey(callParameterName)) {
+				if (!matchedParameters.containsKey(callParameterName) && logger.isWarnEnabled()) {
 					logger.warn("Unable to locate the corresponding parameter value for '" + parameterName +
 							"' within the parameter values provided: " + inParameters.keySet());
 				}

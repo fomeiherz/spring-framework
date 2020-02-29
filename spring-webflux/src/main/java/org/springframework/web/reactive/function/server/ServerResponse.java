@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -412,9 +412,9 @@ public interface ServerResponse {
 		 * Render the template with the given {@code name} using the given {@code modelAttributes}.
 		 * The model attributes are mapped under a
 		 * {@linkplain org.springframework.core.Conventions#getVariableName generated name}.
-		 * <p><emphasis>Note: Empty {@link Collection Collections} are not added to
+		 * <p><em>Note: Empty {@link Collection Collections} are not added to
 		 * the model when using this method because we cannot correctly determine
-		 * the true convention name.</emphasis>
+		 * the true convention name.</em>
 		 * @param name the name of the template to be rendered
 		 * @param modelAttributes the modelAttributes used to render the template
 		 * @return the built response

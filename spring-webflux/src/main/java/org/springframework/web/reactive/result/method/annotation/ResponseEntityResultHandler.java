@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -153,14 +153,12 @@ public class ResponseEntityResultHandler extends AbstractMessageWriterResultHand
 
 			HttpHeaders entityHeaders = httpEntity.getHeaders();
 			HttpHeaders responseHeaders = exchange.getResponse().getHeaders();
-
 			if (!entityHeaders.isEmpty()) {
 				entityHeaders.entrySet().stream()
-						.filter(entry -> !responseHeaders.containsKey(entry.getKey()))
 						.forEach(entry -> responseHeaders.put(entry.getKey(), entry.getValue()));
 			}
 
-			if(httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
+			if (httpEntity.getBody() == null || returnValue instanceof HttpHeaders) {
 				return exchange.getResponse().setComplete();
 			}
 

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -46,9 +46,9 @@ public class MutablePropertySourcesTests {
 		assertThat(sources.contains("g"), is(false));
 
 		assertThat(sources.get("b"), not(nullValue()));
-		assertThat(sources.get("b").getProperty("p1"), equalTo((Object)"bValue"));
+		assertThat(sources.get("b").getProperty("p1"), equalTo("bValue"));
 		assertThat(sources.get("d"), not(nullValue()));
-		assertThat(sources.get("d").getProperty("p1"), equalTo((Object)"dValue"));
+		assertThat(sources.get("d").getProperty("p1"), equalTo("dValue"));
 
 		sources.addBefore("b", new MockPropertySource("a"));
 		sources.addAfter("b", new MockPropertySource("c"));

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2017 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,20 +42,18 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * This builder has two purposes.
+ * This builder has two purposes:
  *
- * <p>One is to assemble a processing chain that consists of a target
- * {@link WebHandler}, then decorated with a set of {@link WebFilter}'s, then
- * further decorated with a set of {@link WebExceptionHandler}'s.
+ * <p>One is to assemble a processing chain that consists of a target {@link WebHandler},
+ * then decorated with a set of {@link WebFilter WebFilters}, then further decorated with
+ * a set of {@link WebExceptionHandler WebExceptionHandlers}.
  *
- * <p>The second purpose is to adapt the resulting processing chain to an
- * {@link HttpHandler} -- the lowest level reactive HTTP handling abstraction,
- * which can then be used with any of the supported runtimes. The adaptation
- * is done with the help of {@link HttpWebHandlerAdapter}.
+ * <p>The second purpose is to adapt the resulting processing chain to an {@link HttpHandler}:
+ * the lowest-level reactive HTTP handling abstraction which can then be used with any of the
+ * supported runtimes. The adaptation is done with the help of {@link HttpWebHandlerAdapter}.
  *
- * <p>The processing chain can be assembled manually via builder methods, or
- * detected from Spring configuration via
- * {@link #applicationContext(ApplicationContext)}, or a mix of both.
+ * <p>The processing chain can be assembled manually via builder methods, or detected from
+ * a Spring {@link ApplicationContext} via {@link #applicationContext}, or a mix of both.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -79,6 +77,9 @@ public class WebHttpHandlerBuilder {
 
 	private final WebHandler webHandler;
 
+	@Nullable
+	private final ApplicationContext applicationContext;
+
 	private final List<WebFilter> filters = new ArrayList<>();
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
@@ -92,22 +93,11 @@ public class WebHttpHandlerBuilder {
 	@Nullable
 	private LocaleContextResolver localeContextResolver;
 
-	@Nullable
-	private ApplicationContext applicationContext;
-
-
-	/**
-	 * Private constructor.
-	 */
-	private WebHttpHandlerBuilder(WebHandler webHandler) {
-		Assert.notNull(webHandler, "WebHandler must not be null");
-		this.webHandler = webHandler;
-	}
 
 	/**
 	 * Private constructor to use when initialized from an ApplicationContext.
 	 */
-	private WebHttpHandlerBuilder(WebHandler webHandler, ApplicationContext applicationContext) {
+	private WebHttpHandlerBuilder(WebHandler webHandler, @Nullable ApplicationContext applicationContext) {
 		Assert.notNull(webHandler, "WebHandler must not be null");
 		this.webHandler = webHandler;
 		this.applicationContext = applicationContext;
@@ -118,6 +108,7 @@ public class WebHttpHandlerBuilder {
 	 */
 	private WebHttpHandlerBuilder(WebHttpHandlerBuilder other) {
 		this.webHandler = other.webHandler;
+		this.applicationContext = other.applicationContext;
 		this.filters.addAll(other.filters);
 		this.exceptionHandlers.addAll(other.exceptionHandlers);
 		this.sessionManager = other.sessionManager;
@@ -132,7 +123,7 @@ public class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder webHandler(WebHandler webHandler) {
-		return new WebHttpHandlerBuilder(webHandler);
+		return new WebHttpHandlerBuilder(webHandler, null);
 	}
 
 	/**
@@ -156,7 +147,6 @@ public class WebHttpHandlerBuilder {
 	 * @return the prepared builder
 	 */
 	public static WebHttpHandlerBuilder applicationContext(ApplicationContext context) {
-
 		WebHttpHandlerBuilder builder = new WebHttpHandlerBuilder(
 				context.getBean(WEB_HANDLER_BEAN_NAME, WebHandler.class), context);
 
@@ -248,13 +238,31 @@ public class WebHttpHandlerBuilder {
 	}
 
 	/**
-	 * Configure the {@link ServerCodecConfigurer} to set on the
-	 * {@link ServerWebExchange WebServerExchange}.
+	 * Whether a {@code WebSessionManager} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #sessionManager}.
+	 * @since 5.0.9
+	 */
+	public boolean hasSessionManager() {
+		return (this.sessionManager != null);
+	}
+
+	/**
+	 * Configure the {@link ServerCodecConfigurer} to set on the {@code WebServerExchange}.
 	 * @param codecConfigurer the codec configurer
 	 */
 	public WebHttpHandlerBuilder codecConfigurer(ServerCodecConfigurer codecConfigurer) {
 		this.codecConfigurer = codecConfigurer;
 		return this;
+	}
+
+
+	/**
+	 * Whether a {@code ServerCodecConfigurer} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #codecConfigurer}.
+	 * @since 5.0.9
+	 */
+	public boolean hasCodecConfigurer() {
+		return (this.codecConfigurer != null);
 	}
 
 	/**
@@ -267,15 +275,21 @@ public class WebHttpHandlerBuilder {
 		return this;
 	}
 
+	/**
+	 * Whether a {@code LocaleContextResolver} is configured or not, either detected from an
+	 * {@code ApplicationContext} or explicitly configured via {@link #localeContextResolver}.
+	 * @since 5.0.9
+	 */
+	public boolean hasLocaleContextResolver() {
+		return (this.localeContextResolver != null);
+	}
+
 
 	/**
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
-
-		WebHandler decorated;
-
-		decorated = new FilteringWebHandler(this.webHandler, this.filters);
+		WebHandler decorated = new FilteringWebHandler(this.webHandler, this.filters);
 		decorated = new ExceptionHandlingWebHandler(decorated,  this.exceptionHandlers);
 
 		HttpWebHandlerAdapter adapted = new HttpWebHandlerAdapter(decorated);

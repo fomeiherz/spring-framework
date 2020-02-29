@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -43,6 +43,7 @@ import org.springframework.web.reactive.function.BodyInserters;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 5.0
+ * @param <T> the entity type
  */
 public interface EntityResponse<T> extends ServerResponse {
 
@@ -100,6 +101,8 @@ public interface EntityResponse<T> extends ServerResponse {
 
 	/**
 	 * Defines a builder for {@code EntityResponse}.
+	 *
+	 * @param <T> a self reference to the builder type
 	 */
 	interface Builder<T> {
 
@@ -173,11 +176,11 @@ public interface EntityResponse<T> extends ServerResponse {
 
 		/**
 		 * Set the entity tag of the body, as specified by the {@code ETag} header.
-		 * @param eTag the new entity tag
+		 * @param etag the new entity tag
 		 * @return this builder
 		 * @see HttpHeaders#setETag(String)
 		 */
-		Builder<T> eTag(String eTag);
+		Builder<T> eTag(String etag);
 
 		/**
 		 * Set the time the resource was last changed, as specified by the

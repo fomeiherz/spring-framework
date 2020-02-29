@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -310,10 +310,10 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		}
 		// We will perform this validation...
 		etag = padEtagIfNecessary(etag);
-		for (String clientETag : ifNoneMatch) {
+		for (String clientEtag : ifNoneMatch) {
 			// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
-			if (StringUtils.hasLength(clientETag) &&
-					clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))) {
+			if (StringUtils.hasLength(clientEtag) &&
+					clientEtag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))) {
 				this.notModified = true;
 				break;
 			}

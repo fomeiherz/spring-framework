@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -72,8 +72,12 @@ public interface Encoder<T> {
 	 * @param t the item to check
 	 * @return the length in bytes, or {@code null} if not known.
 	 * @since 5.0.5
+	 * @deprecated this method was added so {@code EncoderHttpMessageWriter}
+	 * can set the content-length header. However after further improvements as
+	 * of 5.0.7, it is no longer needed, and not used.
 	 */
 	@Nullable
+	@Deprecated
 	default Long getContentLength(T t, @Nullable MimeType mimeType) {
 		return null;
 	}

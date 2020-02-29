@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -48,21 +48,18 @@ class ReactorClientHttpRequest extends AbstractClientHttpRequest implements Zero
 
 	private final HttpClientRequest httpRequest;
 
-	private final NettyDataBufferFactory bufferFactory;
-
 
 	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri,
 			HttpClientRequest httpRequest) {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpRequest = httpRequest.failOnClientError(false).failOnServerError(false);
-		this.bufferFactory = new NettyDataBufferFactory(httpRequest.alloc());
 	}
 
 
 	@Override
 	public DataBufferFactory bufferFactory() {
-		return this.bufferFactory;
+		return ReactorClientHttpConnector.BUFFER_FACTORY;
 	}
 
 	@Override

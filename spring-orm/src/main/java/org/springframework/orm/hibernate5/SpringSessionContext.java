@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2016 the original author or authors.
+ * Copyright 2002-2018 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,9 +32,9 @@ import org.springframework.lang.Nullable;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
- * Implementation of Hibernate 3.1's CurrentSessionContext interface
- * that delegates to Spring's SessionFactoryUtils for providing a
- * Spring-managed current Session.
+ * Implementation of Hibernate 3.1's {@link CurrentSessionContext} interface
+ * that delegates to Spring's {@link SessionFactoryUtils} for providing a
+ * Spring-managed current {@link Session}.
  *
  * <p>This CurrentSessionContext implementation can also be specified in custom
  * SessionFactory setup through the "hibernate.current_session_context_class"
@@ -110,7 +110,8 @@ public class SpringSessionContext implements CurrentSessionContext {
 				if (this.transactionManager.getStatus() == Status.STATUS_ACTIVE) {
 					Session session = this.jtaSessionContext.currentSession();
 					if (TransactionSynchronizationManager.isSynchronizationActive()) {
-						TransactionSynchronizationManager.registerSynchronization(new SpringFlushSynchronization(session));
+						TransactionSynchronizationManager.registerSynchronization(
+								new SpringFlushSynchronization(session));
 					}
 					return session;
 				}

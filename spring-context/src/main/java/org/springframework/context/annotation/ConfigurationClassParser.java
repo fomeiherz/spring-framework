@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2018 the original author or authors.
+ * Copyright 2002-2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -90,9 +90,9 @@ import org.springframework.util.StringUtils;
  * another using the {@link Import} annotation).
  *
  * <p>This class helps separate the concern of parsing the structure of a Configuration
- * class from the concern of registering BeanDefinition objects based on the
- * content of that model (with the exception of {@code @ComponentScan} annotations which
- * need to be registered immediately).
+ * class from the concern of registering BeanDefinition objects based on the content of
+ * that model (with the exception of {@code @ComponentScan} annotations which need to be
+ * registered immediately).
  *
  * <p>This ASM-based implementation avoids reflection and eager class loading in order to
  * interoperate effectively with lazy class loading in a Spring ApplicationContext.
@@ -553,16 +553,15 @@ class ConfigurationClassParser {
 		for (DeferredImportSelectorHolder deferredImport : deferredImports) {
 			Class<? extends Group> group = deferredImport.getImportSelector().getImportGroup();
 			DeferredImportSelectorGrouping grouping = groupings.computeIfAbsent(
-					(group == null ? deferredImport : group),
-					(key) -> new DeferredImportSelectorGrouping(createGroup(group)));
+					(group != null ? group : deferredImport),
+					key -> new DeferredImportSelectorGrouping(createGroup(group)));
 			grouping.add(deferredImport);
 			configurationClasses.put(deferredImport.getConfigurationClass().getMetadata(),
 					deferredImport.getConfigurationClass());
 		}
 		for (DeferredImportSelectorGrouping grouping : groupings.values()) {
-			grouping.getImports().forEach((entry) -> {
-				ConfigurationClass configurationClass = configurationClasses.get(
-						entry.getMetadata());
+			grouping.getImports().forEach(entry -> {
+				ConfigurationClass configurationClass = configurationClasses.get(entry.getMetadata());
 				try {
 					processImports(configurationClass, asSourceClass(configurationClass),
 							asSourceClasses(entry.getImportClassName()), false);
@@ -573,15 +572,14 @@ class ConfigurationClassParser {
 				catch (Throwable ex) {
 					throw new BeanDefinitionStoreException(
 							"Failed to process import candidates for configuration class [" +
-									configurationClass.getMetadata().getClassName() + "]", ex);
+							configurationClass.getMetadata().getClassName() + "]", ex);
 				}
 			});
 		}
 	}
 
 	private Group createGroup(@Nullable Class<? extends Group> type) {
-		Class<? extends Group> effectiveType = (type != null ? type
-				: DefaultDeferredImportSelectorGroup.class);
+		Class<? extends Group> effectiveType = (type != null ? type : DefaultDeferredImportSelectorGroup.class);
 		Group group = BeanUtils.instantiateClass(effectiveType);
 		ParserStrategyUtils.invokeAwareMethods(group,
 				ConfigurationClassParser.this.environment,
@@ -705,7 +703,7 @@ class ConfigurationClassParser {
 	}
 
 	/**
-	 * Factory method to obtain {@link SourceClass}s from class names.
+	 * Factory method to obtain {@link SourceClass SourceClasss} from class names.
 	 */
 	private Collection<SourceClass> asSourceClasses(String... classNames) throws IOException {
 		List<SourceClass> annotatedClasses = new ArrayList<>(classNames.length);
@@ -898,7 +896,7 @@ class ConfigurationClassParser {
 			return new AssignableTypeFilter(clazz).match((MetadataReader) this.source, metadataReaderFactory);
 		}
 
-		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) throws IOException {
+		public ConfigurationClass asConfigClass(ConfigurationClass importedBy) {
 			if (this.source instanceof Class) {
 				return new ConfigurationClass((Class<?>) this.source, importedBy);
 			}
@@ -966,7 +964,7 @@ class ConfigurationClassParser {
 			return result;
 		}
 
-		public Set<SourceClass> getAnnotations() throws IOException {
+		public Set<SourceClass> getAnnotations() {
 			Set<SourceClass> result = new LinkedHashSet<>();
 			for (String className : this.metadata.getAnnotationTypes()) {
 				try {
@@ -996,7 +994,7 @@ class ConfigurationClassParser {
 		private SourceClass getRelated(String className) throws IOException {
 			if (this.source instanceof Class) {
 				try {
-					Class<?> clazz = ((Class<?>) this.source).getClassLoader().loadClass(className);
+					Class<?> clazz = ClassUtils.forName(className, ((Class<?>) this.source).getClassLoader());
 					return asSourceClass(clazz);
 				}
 				catch (ClassNotFoundException ex) {

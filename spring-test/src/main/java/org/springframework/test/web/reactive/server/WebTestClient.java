@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -197,7 +197,7 @@ public interface WebTestClient {
 	 * without an HTTP server using a mock request and response.
 	 * <p>Consider using the TestContext framework and
 	 * {@link org.springframework.test.context.ContextConfiguration @ContextConfiguration}
-	 * in order to efficently load and inject the Spring configuration into the
+	 * in order to efficiently load and inject the Spring configuration into the
 	 * test class.
 	 * @param applicationContext the Spring context
 	 * @return chained API to customize server and client config; use
@@ -359,8 +359,10 @@ public interface WebTestClient {
 
 
 	/**
-	 * Steps for customizing the {@link WebClient} used to test with
-	 * internally delegating to a {@link WebClient.Builder}.
+	 * Steps for customizing the {@link WebClient} used to test with,
+	 * internally delegating to a
+	 * {@link org.springframework.web.reactive.function.client.WebClient.Builder
+	 * WebClient.Builder}.
 	 */
 	interface Builder {
 
@@ -443,7 +445,8 @@ public interface WebTestClient {
 		Builder responseTimeout(Duration timeout);
 
 		/**
-		 * Shortcut for pre-packaged customizations to WebTestClient builder.
+		 * Apply the given configurer to this builder instance.
+		 * <p>This can be useful for applying pre-packaged customizations.
 		 * @param configurer the configurer to apply
 		 */
 		Builder apply(WebTestClientConfigurer configurer);
@@ -591,6 +594,9 @@ public interface WebTestClient {
 	}
 
 
+	/**
+	 * Specification for providing body of a request.
+	 */
 	interface RequestBodySpec extends RequestHeadersSpec<RequestBodySpec> {
 		/**
 		 * Set the length of the body in bytes, as specified by the
@@ -649,10 +655,15 @@ public interface WebTestClient {
 	}
 
 
+	/**
+	 * Specification for providing request headers and the URI of a request.
+	 */
 	interface RequestHeadersUriSpec<S extends RequestHeadersSpec<S>> extends UriSpec<S>, RequestHeadersSpec<S> {
 	}
 
-
+	/**
+	 * Specification for providing the body and the URI of a request.
+	 */
 	interface RequestBodyUriSpec extends RequestBodySpec, RequestHeadersUriSpec<RequestBodySpec> {
 	}
 
@@ -792,7 +803,7 @@ public interface WebTestClient {
 		 * Parse the expected and actual response content as JSON and perform a
 		 * "lenient" comparison verifying the same attribute-value pairs.
 		 * <p>Use of this option requires the
-		 * <a href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library
+		 * <a href="https://jsonassert.skyscreamer.org/">JSONassert</a> library
 		 * on to be on the classpath.
 		 * @param expectedJson the expected JSON content.
 		 */

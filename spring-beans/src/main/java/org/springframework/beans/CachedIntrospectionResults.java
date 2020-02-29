@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -299,8 +299,7 @@ public class CachedIntrospectionResults {
 			// in particular for Java 8 default methods...
 			Class<?> clazz = beanClass;
 			while (clazz != null && clazz != Object.class) {
-				Class<?>[] ifcs = clazz.getInterfaces();
-				for (Class<?> ifc : ifcs) {
+				for (Class<?> ifc : clazz.getInterfaces()) {
 					if (!ClassUtils.isJavaLanguageInterface(ifc)) {
 						for (PropertyDescriptor pd : getBeanInfo(ifc).getPropertyDescriptors()) {
 							if (!this.propertyDescriptorCache.containsKey(pd.getName())) {

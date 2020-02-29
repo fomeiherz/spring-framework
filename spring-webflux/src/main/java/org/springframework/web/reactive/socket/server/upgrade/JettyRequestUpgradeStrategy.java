@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -41,7 +41,6 @@ import org.springframework.web.reactive.socket.adapter.JettyWebSocketHandlerAdap
 import org.springframework.web.reactive.socket.adapter.JettyWebSocketSession;
 import org.springframework.web.reactive.socket.server.RequestUpgradeStrategy;
 import org.springframework.web.server.ServerWebExchange;
-
 
 /**
  * A {@link RequestUpgradeStrategy} for use with Jetty.
@@ -95,9 +94,9 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 			if (!isRunning() && servletContext != null) {
 				this.running = true;
 				try {
-					this.factory = this.webSocketPolicy != null ?
+					this.factory = (this.webSocketPolicy != null ?
 							new WebSocketServerFactory(servletContext, this.webSocketPolicy) :
-							new WebSocketServerFactory(servletContext);
+							new WebSocketServerFactory(servletContext));
 					this.factory.setCreator((request, response) -> {
 						WebSocketHandlerContainer container = adapterHolder.get();
 						String protocol = container.getProtocol();
