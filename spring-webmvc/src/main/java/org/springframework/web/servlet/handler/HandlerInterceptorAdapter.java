@@ -30,6 +30,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Juergen Hoeller
  * @since 05.12.2003
  */
+// 使用拦截器都会继承这个类，然后复写相关方法
 public abstract class HandlerInterceptorAdapter implements AsyncHandlerInterceptor {
 
 	/**

@@ -72,6 +72,7 @@ public interface AsyncHandlerInterceptor extends HandlerInterceptor {
 	 * execution, for type and/or instance examination
 	 * @throws Exception in case of errors
 	 */
+	// 处理异步请求
 	default void afterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response,
 			Object handler) throws Exception {
 	}

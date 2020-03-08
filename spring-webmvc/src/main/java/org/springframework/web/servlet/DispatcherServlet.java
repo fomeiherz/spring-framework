@@ -485,6 +485,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/**
 	 * This implementation calls {@link #initStrategies}.
 	 */
+	// 刷新 Spring 在 Web 功能中所必须使用的全局变量
 	@Override
 	protected void onRefresh(ApplicationContext context) {
 		initStrategies(context);
@@ -495,14 +496,28 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>May be overridden in subclasses in order to initialize further strategy objects.
 	 */
 	protected void initStrategies(ApplicationContext context) {
+		// MultipartResolver 主要用来处理文件上传
+		// 实现类：org.springframework.web.multipart.commons.CommonsMultipartResolver
 		initMultipartResolver(context);
+		// 国际化配置
+		// 基于 URL 参数的配置：AcceptHeaderLocaleResolver
+		// 基于 session 的配置：SessionLocaleResolver
+		// 基于 cookie 的国际化配置：CookieLocaleResolver
 		initLocaleResolver(context);
+		// 主题 Theme 来控制网页风格
 		initThemeResolver(context);
+		// 
 		initHandlerMappings(context);
+		// 默认会加载3个适配器
+		// HTTP 请求处理适配器(HttpRequestHandlerAdapter)：将 HTTP 请求对象和响应对象传递给 HTTP 请求处理器的实现，它不需要返回值。主要应用在基于 HTTP 的远程调用的实现上。
+		// 简单控制器处理器适配器(SimpleControllerHandlerAdapter)：这个实现类将 HTTP 请求适配到一个控制器的实现进行处理。
+		// 注解方法处理器适配器(AnnotationMethodHandlerAdapter)：
 		initHandlerAdapters(context);
+		// 基于 HandlerExceptionResolver 的异常处理
 		initHandlerExceptionResolvers(context);
 		initRequestToViewNameTranslator(context);
 		initViewResolvers(context);
+		// Flash attributes 提供一个请求存储属性
 		initFlashMapManager(context);
 	}
 
@@ -513,6 +528,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initMultipartResolver(ApplicationContext context) {
 		try {
+			// beanName: multipartResolver
 			this.multipartResolver = context.getBean(MULTIPART_RESOLVER_BEAN_NAME, MultipartResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using MultipartResolver [" + this.multipartResolver + "]");
@@ -533,6 +549,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>If no bean is defined with the given name in the BeanFactory for this namespace,
 	 * we default to AcceptHeaderLocaleResolver.
 	 */
+	// 提取配置文件中设置的 LocaleResolver 来初始化 DispatcherServlet 中 localeResolver
 	private void initLocaleResolver(ApplicationContext context) {
 		try {
 			this.localeResolver = context.getBean(LOCALE_RESOLVER_BEAN_NAME, LocaleResolver.class);
@@ -542,6 +559,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			// We need to use the default.
+			// 取 DispatcherServlet.properties 配置的默认实现
 			this.localeResolver = getDefaultStrategy(context, LocaleResolver.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Unable to locate LocaleResolver with name '" + LOCALE_RESOLVER_BEAN_NAME +
@@ -577,9 +595,12 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * <p>If no HandlerMapping beans are defined in the BeanFactory for this namespace,
 	 * we default to BeanNameUrlHandlerMapping.
 	 */
+	// 当客户端发起 Request 时 DispatcherServlet 会将 Request 提交到 HandlerMappings，
+	// 然后 HandlerMappings 根据 WebApplicationContext 的配置回传给 DispatcherServlet 相应的 Controller
 	private void initHandlerMappings(ApplicationContext context) {
 		this.handlerMappings = null;
 
+		// this.detectAllHandlerMappings 默认为 true
 		if (this.detectAllHandlerMappings) {
 			// Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
 			Map<String, HandlerMapping> matchingBeans =
@@ -592,6 +613,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		}
 		else {
 			try {
+				// 查找 beanName = handlerMapping 的 bean
 				HandlerMapping hm = context.getBean(HANDLER_MAPPING_BEAN_NAME, HandlerMapping.class);
 				this.handlerMappings = Collections.singletonList(hm);
 			}
@@ -603,6 +625,7 @@ public class DispatcherServlet extends FrameworkServlet {
 		// Ensure we have at least one HandlerMapping, by registering
 		// a default HandlerMapping if no other mappings are found.
 		if (this.handlerMappings == null) {
+			// 获取 DispatcherServlet.properties 定义的 HandlerMapping 的实现
 			this.handlerMappings = getDefaultStrategies(context, HandlerMapping.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("No HandlerMappings found in servlet '" + getServletName() + "': using default");
@@ -618,6 +641,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	private void initHandlerAdapters(ApplicationContext context) {
 		this.handlerAdapters = null;
 
+		// 默认 detectAllHandlerAdapters = true
 		if (this.detectAllHandlerAdapters) {
 			// Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
 			Map<String, HandlerAdapter> matchingBeans =
@@ -960,6 +984,8 @@ public class DispatcherServlet extends FrameworkServlet {
 				processedRequest = checkMultipart(request);
 				multipartRequestParsed = (processedRequest != request);
 
+				// 得到 HandlerExecutionChain 对象，
+				// 这个对象包括HandlerMethod和Interceptors集合
 				// Determine handler for the current request.
 				mappedHandler = getHandler(processedRequest);
 				if (mappedHandler == null) {

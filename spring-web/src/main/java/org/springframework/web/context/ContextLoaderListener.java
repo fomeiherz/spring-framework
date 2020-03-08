@@ -34,6 +34,7 @@ import javax.servlet.ServletContextListener;
  * @see #setContextInitializers
  * @see org.springframework.web.WebApplicationInitializer
  */
+// ContextLoaderListener的作用就是启动Web容器时，自动装配ApplicationContext的配置信息
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
 	/**

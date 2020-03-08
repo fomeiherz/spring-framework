@@ -151,12 +151,16 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		}
 
 		// Set bean properties from init parameters.
+		// 解析 init-param 并封装到 pvs 中
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
+				// 将当前的这个 Servlet 类转化为一个 BeanWrapper，从而能够以 Spring 方式来对 init-param 的值进行注入
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
+				// 注册自定义属性编辑器，一旦遇到 Resource 类型的属性将会使用 ResourceLoader 去解析
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
+				// 空实现，留给子类实现
 				initBeanWrapper(bw);
 				bw.setPropertyValues(pvs, true);
 			}
@@ -221,6 +225,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 		 * we can't accept default values
 		 * @throws ServletException if any required properties are missing
 		 */
+		// 对初始化的参数进行封装，也就是 servlet 中配置的 <init-param> 中配置的封装
 		public ServletConfigPropertyValues(ServletConfig config, Set<String> requiredProperties)
 				throws ServletException {
 
